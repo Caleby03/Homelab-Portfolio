@@ -1,0 +1,382 @@
+<title>Homelab</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --bg: #12141a;
+    --bg-elev: #1a1d25;
+    --text: #d9dce3;
+    --text-dim: #9aa0ac;
+    --border: #2a2e38;
+    --built-bg: #16302280;
+    --built-fg: #6fcf97;
+    --built-border: #2f5b41;
+    --progress-bg: #3a2f1580;
+    --progress-fg: #e0b565;
+    --progress-border: #5c4a26;
+    --planned-bg: #23252b80;
+    --planned-fg: #9aa0ac;
+    --planned-border: #383b44;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.25rem;
+    color: #f0f1f4;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 3rem 0 1rem;
+    color: #f0f1f4;
+  }
+
+  p {
+    margin: 0 0 1.1rem;
+    color: var(--text);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  .intro {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 0 0 1.25rem;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-size: 0.95rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  thead th {
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .arch-table td, .arch-table th {
+    white-space: normal;
+    vertical-align: top;
+  }
+
+  .status-table td:first-child {
+    white-space: normal;
+    color: var(--text);
+  }
+
+  .status-table td:last-child {
+    white-space: normal;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.2em 0.65em;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .badge-built {
+    background: var(--built-bg);
+    color: var(--built-fg);
+    border-color: var(--built-border);
+  }
+
+  .badge-progress {
+    background: var(--progress-bg);
+    color: var(--progress-fg);
+    border-color: var(--progress-border);
+  }
+
+  .badge-planned {
+    background: var(--planned-bg);
+    color: var(--planned-fg);
+    border-color: var(--planned-border);
+  }
+
+  .status-note {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+
+  .adr {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.4rem;
+    margin: 0 0 1.25rem;
+  }
+
+  .adr p {
+    margin: 0;
+  }
+
+  .adr strong {
+    color: #f0f1f4;
+  }
+
+  footer {
+    margin-top: 3rem;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    main {
+      padding: 2.25rem 1.1rem 3.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    th, td {
+      padding: 0.6rem 0.75rem;
+      font-size: 0.88rem;
+    }
+  }
+</style>
+
+<main>
+  <h1>Homelab</h1>
+  <p class="intro">
+    A three-node homelab built around a deliberate split of responsibilities: an
+    always-on Dell OptiPlex 7050 Micro running stateful services, a Windows gaming
+    desktop used as burst GPU capacity, and a Raspberry Pi acting as an independent
+    watchdog. All inter-node traffic runs over Tailscale. The interesting part is
+    not the hardware &mdash; it is the constraint that each node is chosen for what it is
+    actually good at, and that the monitoring is designed around the assumption
+    that any given node will fail.
+  </p>
+
+  <hr>
+
+  <h2>Architecture</h2>
+  <div class="table-wrap">
+    <table class="arch-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Pi (Node C)</th>
+          <th>OptiPlex (Node B)</th>
+          <th>Desktop (Node A)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Defining trait</th>
+          <td>~5W, never off</td>
+          <td>i7, 16GB, always on</td>
+          <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
+        </tr>
+        <tr>
+          <th>Failure mode</th>
+          <td>SD card death</td>
+          <td>OOM, disk fill</td>
+          <td>You start a game</td>
+        </tr>
+        <tr>
+          <th>Good at</th>
+          <td>Watchdog, DNS</td>
+          <td>Stateful services</td>
+          <td>Burst compute</td>
+        </tr>
+        <tr>
+          <th>Bad at</th>
+          <td>Anything heavy</td>
+          <td>Sustained CPU/GPU</td>
+          <td>Being available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    The desktop being unreliable is a design input, not a defect. It is expected to
+    disappear whenever it gets used for gaming, so nothing stateful lives there and
+    nothing alerts on its absence.
+  </p>
+
+  <hr>
+
+  <h2>Selected decisions</h2>
+  <p>
+    Architecture Decision Records are kept with the configuration. They will be
+    published here as they are cleared for public release.
+  </p>
+  <div class="adr">
+    <p>
+      <strong>ADR-0001 &mdash; Uptime Kuma runs on the Pi, not the OptiPlex.</strong> Uptime Kuma was
+      originally installed on the OptiPlex simply because that is where everything
+      else already lived, which made the OptiPlex a single point of failure for
+      knowing whether the OptiPlex was up. Alerting that shares a failure domain with
+      the thing it watches goes silent at exactly the moment it is needed &mdash; the
+      outage takes down the notification path along with everything else. Moving Kuma
+      to a separate ~5W node with its own power draw, storage and failure modes turns
+      a silent outage into an alert.
+    </p>
+  </div>
+
+  <hr>
+
+  <h2>Status</h2>
+  <p>Honest accounting of what is actually running today.</p>
+
+  <div class="table-wrap">
+    <table class="status-table">
+      <tbody>
+        <tr>
+          <td>Three-node hardware plan and role split</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>OptiPlex node &mdash; board fix and RAM upgrade</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Tailscale mesh across the two active nodes</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Containerized always-on service stack</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Uptime monitoring and alerting</td>
+          <td><span class="badge badge-built">Built</span><span class="status-note">&mdash; running on the always-on node</span></td>
+        </tr>
+        <tr>
+          <td>Service dashboard / command center</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Stateful data layer and job queue</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Hybrid local + hosted LLM inference routing</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Infrastructure-as-config repo and ADR practice</td>
+          <td><span class="badge badge-built">Built</span></td>
+        </tr>
+        <tr>
+          <td>Metrics collection and time-series dashboards</td>
+          <td><span class="badge badge-progress">In progress</span><span class="status-note">&mdash; deployed, not yet configured</span></td>
+        </tr>
+        <tr>
+          <td>Host and GPU metrics exporters</td>
+          <td><span class="badge badge-progress">In progress</span></td>
+        </tr>
+        <tr>
+          <td>API spend dashboard widget</td>
+          <td><span class="badge badge-progress">In progress</span></td>
+        </tr>
+        <tr>
+          <td>Raspberry Pi node</td>
+          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; hardware not yet deployed</span></td>
+        </tr>
+        <tr>
+          <td>Relocating uptime monitoring to the Pi (ADR-0001)</td>
+          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; depends on the Pi</span></td>
+        </tr>
+        <tr>
+          <td>Pi-hole and DNS</td>
+          <td><span class="badge badge-planned">Planned</span></td>
+        </tr>
+        <tr>
+          <td>Workflow orchestration and document management</td>
+          <td><span class="badge badge-planned">Planned</span></td>
+        </tr>
+        <tr>
+          <td>Single sign-on</td>
+          <td><span class="badge badge-planned">Planned</span></td>
+        </tr>
+        <tr>
+          <td>Rack enclosure and environmental sensors</td>
+          <td><span class="badge badge-planned">Planned</span></td>
+        </tr>
+        <tr>
+          <td>Dedicated local AI node</td>
+          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; deferred, possibly indefinitely</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Nothing above is marked Built unless it is running now. Items with written
+    configuration but no deployment are marked In progress, not Built.
+  </p>
+
+  <hr>
+
+  <h2>Note on scope</h2>
+  <p>
+    This is the public view. Configuration, runbooks, network addressing and the
+    full service inventory live in a separate private repository.
+  </p>
+
+  <footer>Homelab</footer>
+</main>
