@@ -2,8 +2,8 @@
 
 A three-node homelab built around a deliberate split of responsibilities: an
 always-on Dell OptiPlex 7050 Micro running stateful services, a Windows gaming
-desktop used as burst GPU capacity, and a Raspberry Pi acting as an independent
-watchdog. All inter-node traffic runs over Tailscale. The interesting part is
+desktop (Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU
+capacity, and a Raspberry Pi acting as an independent watchdog. All inter-node traffic runs over Tailscale. The interesting part is
 not the hardware — it is the constraint that each node is chosen for what it is
 actually good at, and that the monitoring is designed around the assumption
 that any given node will fail.
