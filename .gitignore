@@ -1,0 +1,43 @@
+# ============================================
+# Secrets — the only part of this file that matters
+# ============================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+secrets/
+**/credentials.json
+**/authentik/media/
+
+# SOPS-encrypted files ARE safe to commit — that's the point.
+!*.enc.yaml
+!*.enc.env
+
+# ============================================
+# Runtime state — belongs in volumes, not git
+# ============================================
+data/
+*.db
+*.sqlite
+*.sqlite3
+prometheus-data/
+grafana-data/
+paperless-media/
+**/backups/
+
+# ============================================
+# Generated reports
+# ============================================
+windows-audit.md
+*.log
+
+# ============================================
+# OS / editor
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
