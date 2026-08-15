@@ -50,13 +50,17 @@ Honest accounting of what is actually running today.
 | Three-node hardware plan and role split | **Built** |
 | OptiPlex node — board fix and RAM upgrade | **Built** |
 | Tailscale mesh across the two active nodes | **Built** |
+| Containerized always-on service stack | **Built** |
+| Uptime monitoring and alerting | **Built** — running on the always-on node |
+| Service dashboard / command center | **Built** |
+| Stateful data layer and job queue | **Built** |
 | Hybrid local + hosted LLM inference routing | **Built** |
 | Infrastructure-as-config repo and ADR practice | **Built** |
-| Prometheus / Grafana / Homepage monitoring stack | **In progress** — configs written and committed, not yet deployed |
-| Host and GPU metrics exporters | **In progress** — configs written, not yet deployed |
+| Metrics collection and time-series dashboards | **In progress** — deployed, not yet configured |
+| Host and GPU metrics exporters | **In progress** |
 | API spend dashboard widget | **In progress** |
 | Raspberry Pi node | **Planned** — hardware not yet deployed |
-| Uptime Kuma on the Pi (ADR-0001) | **Planned** — depends on the Pi |
+| Relocating uptime monitoring to the Pi (ADR-0001) | **Planned** — depends on the Pi |
 | Pi-hole and DNS | **Planned** |
 | Workflow orchestration and document management | **Planned** |
 | Single sign-on | **Planned** |
