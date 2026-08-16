@@ -60,7 +60,7 @@ Containerized on the always-on node, managed through Portainer:
 | Double-entry bookkeeping | Manager.io |
 
 Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
-the host/GPU exporters) are deployed but not yet configured — see Status.
+the host/GPU exporters) are deployed but not yet configured — see Build status.
 
 ---
 
@@ -75,8 +75,10 @@ Conventions applied across every compose file in the private config repo:
   reproduces the same stack rather than silently pulling a new major version.
 - **Config is bind-mounted, state lives in named volumes.** Config is in git;
   state deliberately is not. The repo plus a Tailscale login is the rebuild path.
-- **Nothing binds to `0.0.0.0`.** Services bind to the Tailscale interface only,
-  so nothing is reachable from the local network, let alone the internet.
+- **Reachability is a firewall property, not a bind-address property.** Docker
+  continues to listen on all interfaces so containers can reach one another and
+  the host; the packet filter is what decides who gets through. See Network
+  security model.
 - **Services address each other by Tailscale MagicDNS name, not IP.** This is
   what makes a service portable between nodes: moving it becomes a volume copy
   rather than a config rewrite. The one exception is Docker port bindings, which
@@ -99,15 +101,51 @@ that being on the same physical network grants nothing at all.
   services because it has authenticated onto the tailnet — not because it
   happens to sit on the right LAN. Revoking a device removes its access
   everywhere at once, rather than requiring a firewall change.
-- **Services bind to the Tailscale interface only, never `0.0.0.0`.** A service
-  is not reachable from the local network even from a machine plugged into the
-  same switch. This is enforced in the compose files themselves rather than
-  relying on a perimeter firewall to catch mistakes.
+- **The firewall is the enforcement boundary.** Docker deliberately still
+  listens on all interfaces, so containers and the host can talk to each other
+  without special-casing every service. External traffic is filtered in the
+  `DOCKER-USER` chain — evaluated ahead of Docker's own accept rules — so only
+  packets arriving over the Tailscale interface reach a published port. Host
+  SSH is restricted to the same interface via UFW.
 - **The desktop is firewalled to the tailnet range** for the exporter ports it
   publishes, so an exporter cannot be scraped from anywhere else.
 - **Secrets stay out of version control.** `.env` is gitignored, `.env.example`
   documents every required variable with placeholder values, and `gitleaks` is
   run against staged changes before every push.
+
+### Closing a real gap: Docker's firewall bypass
+
+The tailnet-only property was originally enforced by convention — every
+published port was expected to carry an explicit bind address. Auditing it
+showed that convention was not holding, and published container ports were
+reachable from the LAN.
+
+The cause is a well-known and easily-missed Docker behaviour: publishing a port
+inserts iptables rules that are evaluated *before* the chain UFW manages. A
+`deny incoming` default policy therefore does not block a published container
+port. UFW reports the host as locked down while Docker has already accepted the
+traffic.
+
+That is the worst class of security bug in a homelab — not an open port, but a
+system that reports itself as closed while it is open, so everything built on
+top of it inherits a false assumption. The fix was to stop treating bind
+addresses as a security control and put enforcement in the packet filter
+instead: rules in the `DOCKER-USER` chain, which is evaluated ahead of Docker's
+own accept rules, admit only traffic arriving over the Tailscale interface.
+Host SSH was locked to that same interface with UFW. Containers still listen
+broadly so they can reach one another and the host — reachability is decided at
+the filter, not at the socket.
+
+The tradeoff is deliberate and worth stating: enforcement is now a single
+control rather than layered. Because the listening sockets remain open on all
+interfaces, the firewall rules are load-bearing, which makes their persistence
+across reboots and Docker restarts a first-class operational concern rather
+than a detail.
+
+Recorded as ADR-0002, with a runbook covering verification — which has to be
+done from a LAN host that is not on the tailnet, since checking from the host
+itself passes trivially and proves nothing.
+
 
 Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
 restricting which node may reach which service, and network isolation for agent
@@ -153,6 +191,10 @@ fault that exists now, or remove a ceiling actually being hit.
   than an IP, the second pass is a volume copy rather than a rewrite.
 - **OptiPlex board replacement and 8→16GB RAM upgrade.** Fixed a real fault and
   lifted a ceiling that was actually being hit, which is what justified it.
+- **Docker firewall lockdown.** Audited the tailnet-only invariant, found
+  published container ports reachable from the LAN because Docker bypasses UFW,
+  and moved enforcement into the `DOCKER-USER` chain with SSH restricted via
+  UFW. See ADR-0002.
 - **Monitoring stack rollout.** Prometheus recording rules pre-compute the
   values the dashboard displays, because the dashboard widget passes PromQL in a
   URL query string and long expressions become an encoding problem. Collapsing
@@ -184,7 +226,8 @@ Built in public. This is a live project, so the page separates what runs today
 from what is next — nothing below is listed as running unless it is.
 
 **Running now.** Three-node role split with workloads placed by node
-reliability. Tailscale-only mesh with no public ingress and no LAN exposure.
+reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
+firewall after an audit found Docker bypassing UFW (ADR-0002).
 Containerized always-on stack — container management, uptime monitoring and
 alerting, service dashboard, relational database, queue broker and bookkeeping —
 every container under an explicit memory limit and a pinned image tag. Hybrid

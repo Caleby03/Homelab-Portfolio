@@ -1,37 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homelab</title>
 <style>
   :root {
-    --bg: #0e1116;
-    --bg-raised: #151a22;
-    --border: #2a313d;
-    --text: #dde3ea;
-    --text-dim: #9aa5b3;
-    --text-faint: #6b7684;
-    --accent: #6fa8dc;
-    --code-bg: #1c2330;
-    --code-text: #cdd8e5;
-    --green: #7fbf7f;
+    --bg: #12141a;
+    --bg-raised: #181b22;
+    --border: #2a2e38;
+    --text: #e8eaef;
+    --text-dim: #a8adba;
+    --text-faint: #7c8191;
+    --accent: #7aa2ff;
+    --green: #4caf7d;
+    --green-bg: rgba(76, 175, 125, 0.12);
+    --green-border: rgba(76, 175, 125, 0.45);
     --amber: #d9a441;
-    --grey: #9aa5b3;
+    --amber-bg: rgba(217, 164, 65, 0.12);
+    --amber-border: rgba(217, 164, 65, 0.45);
+    --grey: #9096a3;
+    --grey-bg: rgba(144, 150, 163, 0.10);
+    --grey-border: rgba(144, 150, 163, 0.40);
+    --code-bg: #21242e;
+    --code-text: #d7c9ff;
+    --callout-bg: rgba(217, 164, 65, 0.10);
     --callout-border: #d9a441;
-    --callout-bg: #1e1a12;
+    --highlight-bg: #1b2030;
+    --highlight-border: #7aa2ff;
   }
 
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   html, body {
     margin: 0;
     padding: 0;
-    background: var(--bg);
+    max-width: 100%;
     overflow-x: hidden;
   }
 
   body {
+    background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.7;
     font-size: 17px;
     -webkit-font-smoothing: antialiased;
@@ -40,221 +51,228 @@
   main {
     max-width: 860px;
     margin: 0 auto;
-    padding: 4rem 1.5rem 6rem;
+    padding: 48px 24px 96px;
   }
 
-  header {
-    margin-bottom: 3rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 2.5rem;
+  header.page-header {
+    margin-bottom: 40px;
   }
 
   h1 {
-    font-size: 2.1rem;
+    font-size: 2.1em;
     font-weight: 700;
+    margin: 0 0 8px;
     letter-spacing: -0.01em;
-    margin: 0 0 1.25rem;
     color: var(--text);
-  }
-
-  header p {
-    color: var(--text-dim);
-    margin: 0 0 1rem;
-    max-width: 66ch;
-  }
-
-  header p:last-child {
-    margin-bottom: 0;
-  }
-
-  section {
-    margin: 3.25rem 0;
   }
 
   h2 {
-    font-size: 1.3rem;
+    font-size: 1.5em;
     font-weight: 700;
-    letter-spacing: -0.005em;
-    margin: 0 0 1.25rem;
-    padding-bottom: 0.6rem;
+    margin: 0 0 20px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
     color: var(--text);
+    letter-spacing: -0.01em;
   }
 
   h3 {
-    font-size: 1.05rem;
+    font-size: 1.15em;
     font-weight: 600;
-    margin: 2rem 0 1rem;
+    margin: 28px 0 12px;
     color: var(--text);
   }
 
   p {
-    margin: 0 0 1.1rem;
-    color: var(--text);
-    max-width: 68ch;
+    margin: 0 0 16px;
+    color: var(--text-dim);
   }
 
-  p:last-child {
-    margin-bottom: 0;
-  }
-
-  ul {
-    margin: 0 0 1.1rem;
-    padding-left: 1.3rem;
-  }
-
-  li {
-    margin-bottom: 0.85rem;
-    max-width: 66ch;
-  }
-
-  li:last-child {
-    margin-bottom: 0;
-  }
+  p:last-child { margin-bottom: 0; }
 
   strong {
     color: var(--text);
     font-weight: 600;
   }
 
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.86em;
-    background: var(--code-bg);
-    color: var(--code-text);
-    padding: 0.12em 0.4em;
-    border-radius: 4px;
+  em {
+    font-style: italic;
   }
 
+  section {
+    margin-bottom: 44px;
+  }
+
+  hr {
+    display: none;
+  }
+
+  ul {
+    margin: 0 0 16px;
+    padding-left: 1.3em;
+    color: var(--text-dim);
+  }
+
+  li {
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+
+  li:last-child { margin-bottom: 0; }
+
+  li p { margin-bottom: 6px; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 0.15em 0.45em;
+    border-radius: 4px;
+    font-size: 0.87em;
+    white-space: nowrap;
+  }
+
+  /* Tables */
   .table-wrap {
     overflow-x: auto;
+    margin: 0 0 16px;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    margin: 0 0 1.25rem;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch;
   }
 
   table {
     border-collapse: collapse;
     width: 100%;
     min-width: 480px;
-    font-size: 0.92rem;
+    font-size: 0.95em;
   }
 
   th, td {
     text-align: left;
-    padding: 0.7rem 1rem;
+    padding: 10px 16px;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
 
-  thead th {
+  th {
     background: var(--bg-raised);
-    color: var(--text-dim);
-    font-weight: 600;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  tbody th {
-    color: var(--text-dim);
-    font-weight: 600;
-    background: var(--bg-raised);
-  }
-
-  td, tbody th {
     color: var(--text);
+    font-weight: 600;
   }
 
+  td {
+    color: var(--text-dim);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* Callout for "not running today" */
   .callout {
-    border: 1px solid var(--callout-border);
     background: var(--callout-bg);
+    border: 1px solid var(--callout-border);
+    border-left-width: 4px;
     border-radius: 6px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .callout-label {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--amber);
-    margin-bottom: 0.6rem;
+    padding: 14px 18px;
+    margin: 0 0 18px;
+    font-weight: 600;
+    color: var(--text);
   }
 
   .callout p {
-    margin-bottom: 0;
+    margin: 0;
     color: var(--text);
   }
 
-  .callout p strong {
-    color: var(--amber);
+  /* Highlighted subsection: Docker firewall bypass */
+  .highlight-panel {
+    background: var(--highlight-bg);
+    border-left: 4px solid var(--highlight-border);
+    border-radius: 6px;
+    padding: 4px 24px 20px;
+    margin: 28px 0;
   }
 
-  .status-item {
-    margin-bottom: 1.5rem;
+  .highlight-panel h3 {
+    margin-top: 20px;
   }
 
-  .status-item:last-child {
-    margin-bottom: 0;
+  /* Build status badges */
+  .status-block {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .status-block:last-child { margin-bottom: 0; }
+
+  .status-block p {
+    color: var(--text-dim);
+    margin: 0;
   }
 
   .status-label {
+    display: inline-block;
     font-weight: 700;
+    font-size: 0.78em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 10px;
   }
 
-  .status-label.running {
-    color: var(--green);
+  .status-block.running {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+  .status-block.running .status-label {
+    background: var(--green-border);
+    color: #0d1912;
   }
 
-  .status-label.progress {
-    color: var(--amber);
+  .status-block.progress {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+  }
+  .status-block.progress .status-label {
+    background: var(--amber-border);
+    color: #211703;
   }
 
-  .status-label.next {
-    color: var(--grey);
+  .status-block.next {
+    background: var(--grey-bg);
+    border-color: var(--grey-border);
   }
-
-  hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0;
+  .status-block.next .status-label {
+    background: var(--grey-border);
+    color: #14161b;
   }
 
   footer {
-    margin-top: 3.5rem;
-    padding-top: 2rem;
+    margin-top: 56px;
+    padding-top: 24px;
     border-top: 1px solid var(--border);
     color: var(--text-faint);
-    font-size: 0.9rem;
+    font-size: 0.9em;
   }
 
-  footer p {
-    color: var(--text-faint);
-    margin: 0;
-  }
+  footer p { color: var(--text-faint); margin: 0; }
 
   @media (max-width: 480px) {
-    body {
-      font-size: 16px;
-    }
-    main {
-      padding: 2.5rem 1.1rem 4rem;
-    }
-    h1 {
-      font-size: 1.7rem;
-    }
+    body { font-size: 16px; }
+    main { padding: 32px 16px 72px; }
+    h1 { font-size: 1.7em; }
+    h2 { font-size: 1.3em; }
+    .highlight-panel { padding: 4px 16px 16px; }
   }
 </style>
-
+</head>
+<body>
 <main>
-  <header>
+
+  <header class="page-header">
     <h1>Homelab</h1>
     <p>
       A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
@@ -273,7 +291,6 @@
 
   <section id="architecture">
     <h2>Architecture</h2>
-
     <div class="table-wrap">
       <table>
         <thead>
@@ -286,25 +303,25 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row">Defining trait</th>
+            <td><strong>Defining trait</strong></td>
             <td>~5W, never off</td>
             <td>i7, 16GB, always on</td>
             <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
           </tr>
           <tr>
-            <th scope="row">Failure mode</th>
+            <td><strong>Failure mode</strong></td>
             <td>SD card death</td>
             <td>OOM, disk fill</td>
             <td>You start a game</td>
           </tr>
           <tr>
-            <th scope="row">Good at</th>
+            <td><strong>Good at</strong></td>
             <td>Watchdog, DNS</td>
             <td>Stateful services</td>
             <td>Burst compute</td>
           </tr>
           <tr>
-            <th scope="row">Bad at</th>
+            <td><strong>Bad at</strong></td>
             <td>Anything heavy</td>
             <td>Sustained CPU/GPU</td>
             <td>Being available</td>
@@ -314,7 +331,6 @@
     </div>
 
     <h3>Why the work is split this way</h3>
-
     <p>
       <strong>The desktop is unreliable by design.</strong> It is a gaming machine first, so it
       disappears without warning. That is treated as an input, not a defect: nothing
@@ -344,7 +360,6 @@
   <section id="what-is-running">
     <h2>What is running</h2>
     <p>Containerized on the always-on node, managed through Portainer:</p>
-
     <div class="table-wrap">
       <table>
         <thead>
@@ -381,10 +396,9 @@
         </tbody>
       </table>
     </div>
-
     <p>
       Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
-      the host/GPU exporters) are deployed but not yet configured — see Status.
+      the host/GPU exporters) are deployed but not yet configured — see Build status.
     </p>
   </section>
 
@@ -392,34 +406,24 @@
     <h2>Operational practice</h2>
     <p>Conventions applied across every compose file in the private config repo:</p>
     <ul>
-      <li>
-        <strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
+      <li><strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
         is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
-        sized deliberately so it fits alongside the services it observes.
-      </li>
-      <li>
-        <strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
-        reproduces the same stack rather than silently pulling a new major version.
-      </li>
-      <li>
-        <strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
-        state deliberately is not. The repo plus a Tailscale login is the rebuild path.
-      </li>
-      <li>
-        <strong>Nothing binds to <code>0.0.0.0</code>.</strong> Services bind to the Tailscale interface only,
-        so nothing is reachable from the local network, let alone the internet.
-      </li>
-      <li>
-        <strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
+        sized deliberately so it fits alongside the services it observes.</li>
+      <li><strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
+        reproduces the same stack rather than silently pulling a new major version.</li>
+      <li><strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
+        state deliberately is not. The repo plus a Tailscale login is the rebuild path.</li>
+      <li><strong>Reachability is a firewall property, not a bind-address property.</strong> Docker
+        continues to listen on all interfaces so containers can reach one another and
+        the host; the packet filter is what decides who gets through. See Network
+        security model.</li>
+      <li><strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
         what makes a service portable between nodes: moving it becomes a volume copy
         rather than a config rewrite. The one exception is Docker port bindings, which
-        require a literal address at bind time.
-      </li>
-      <li>
-        <strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+        require a literal address at bind time.</li>
+      <li><strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
         documents every variable with placeholder values, and <code>gitleaks</code> runs against
-        staged changes before every push.
-      </li>
+        staged changes before every push.</li>
     </ul>
   </section>
 
@@ -430,33 +434,66 @@
       that being on the same physical network grants nothing at all.
     </p>
     <ul>
-      <li>
-        <strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
+      <li><strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
         carries all inter-node traffic. There is no port forwarding on the router, no
-        reverse proxy exposed to the internet, and no public ingress of any kind.
-      </li>
-      <li>
-        <strong>Access is authenticated per device, not per network.</strong> A machine reaches
+        reverse proxy exposed to the internet, and no public ingress of any kind.</li>
+      <li><strong>Access is authenticated per device, not per network.</strong> A machine reaches
         services because it has authenticated onto the tailnet — not because it
         happens to sit on the right LAN. Revoking a device removes its access
-        everywhere at once, rather than requiring a firewall change.
-      </li>
-      <li>
-        <strong>Services bind to the Tailscale interface only, never <code>0.0.0.0</code>.</strong> A service
-        is not reachable from the local network even from a machine plugged into the
-        same switch. This is enforced in the compose files themselves rather than
-        relying on a perimeter firewall to catch mistakes.
-      </li>
-      <li>
-        <strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
-        publishes, so an exporter cannot be scraped from anywhere else.
-      </li>
-      <li>
-        <strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+        everywhere at once, rather than requiring a firewall change.</li>
+      <li><strong>The firewall is the enforcement boundary.</strong> Docker deliberately still
+        listens on all interfaces, so containers and the host can talk to each other
+        without special-casing every service. External traffic is filtered in the
+        <code>DOCKER-USER</code> chain — evaluated ahead of Docker's own accept rules — so only
+        packets arriving over the Tailscale interface reach a published port. Host
+        SSH is restricted to the same interface via UFW.</li>
+      <li><strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
+        publishes, so an exporter cannot be scraped from anywhere else.</li>
+      <li><strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
         documents every required variable with placeholder values, and <code>gitleaks</code> is
-        run against staged changes before every push.
-      </li>
+        run against staged changes before every push.</li>
     </ul>
+
+    <div class="highlight-panel">
+      <h3>Closing a real gap: Docker's firewall bypass</h3>
+      <p>
+        The tailnet-only property was originally enforced by convention — every
+        published port was expected to carry an explicit bind address. Auditing it
+        showed that convention was not holding, and published container ports were
+        reachable from the LAN.
+      </p>
+      <p>
+        The cause is a well-known and easily-missed Docker behaviour: publishing a port
+        inserts iptables rules that are evaluated <em>before</em> the chain UFW manages. A
+        <code>deny incoming</code> default policy therefore does not block a published container
+        port. UFW reports the host as locked down while Docker has already accepted the
+        traffic.
+      </p>
+      <p>
+        That is the worst class of security bug in a homelab — not an open port, but a
+        system that reports itself as closed while it is open, so everything built on
+        top of it inherits a false assumption. The fix was to stop treating bind
+        addresses as a security control and put enforcement in the packet filter
+        instead: rules in the <code>DOCKER-USER</code> chain, which is evaluated ahead of Docker's
+        own accept rules, admit only traffic arriving over the Tailscale interface.
+        Host SSH was locked to that same interface with UFW. Containers still listen
+        broadly so they can reach one another and the host — reachability is decided at
+        the filter, not at the socket.
+      </p>
+      <p>
+        The tradeoff is deliberate and worth stating: enforcement is now a single
+        control rather than layered. Because the listening sockets remain open on all
+        interfaces, the firewall rules are load-bearing, which makes their persistence
+        across reboots and Docker restarts a first-class operational concern rather
+        than a detail.
+      </p>
+      <p>
+        Recorded as ADR-0002, with a runbook covering verification — which has to be
+        done from a LAN host that is not on the tailnet, since checking from the host
+        itself passes trivially and proves nothing.
+      </p>
+    </div>
+
     <p>
       Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
       restricting which node may reach which service, and network isolation for agent
@@ -502,32 +539,31 @@
   <section id="migrations">
     <h2>Migrations</h2>
     <ul>
-      <li>
-        <strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
+      <li><strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
         Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
         is useful practice, and because every monitor targets a MagicDNS name rather
-        than an IP, the second pass is a volume copy rather than a rewrite.
-      </li>
-      <li>
-        <strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
-        lifted a ceiling that was actually being hit, which is what justified it.
-      </li>
-      <li>
-        <strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
+        than an IP, the second pass is a volume copy rather than a rewrite.</li>
+      <li><strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
+        lifted a ceiling that was actually being hit, which is what justified it.</li>
+      <li><strong>Docker firewall lockdown.</strong> Audited the tailnet-only invariant, found
+        published container ports reachable from the LAN because Docker bypasses UFW,
+        and moved enforcement into the <code>DOCKER-USER</code> chain with SSH restricted via
+        UFW. See ADR-0002.</li>
+      <li><strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
         values the dashboard displays, because the dashboard widget passes PromQL in a
         URL query string and long expressions become an encoding problem. Collapsing
-        each to a single short metric name keeps the dashboard config readable.
-      </li>
+        each to a single short metric name keeps the dashboard config readable.</li>
     </ul>
   </section>
 
   <section id="planned-agent-orchestration">
     <h2>Planned — agent orchestration</h2>
     <div class="callout">
-      <span class="callout-label">Not yet built</span>
-      <p><strong>Nothing in this section is running today.</strong> It is the next phase of the build,
-      recorded here as direction rather than achievement.</p>
+      <p>Nothing in this section is running today.</p>
     </div>
+    <p>
+      It is the next phase of the build, recorded here as direction rather than achievement.
+    </p>
     <p>
       The intent is a managed cluster of AI agents handling day-to-day operational
       work — monitoring triage, routine maintenance, bookkeeping and document intake —
@@ -550,26 +586,36 @@
       from what is next — nothing below is listed as running unless it is.
     </p>
 
-    <div class="status-item">
-      <p><span class="status-label running">Running now.</span> Three-node role split with workloads placed by node
-      reliability. Tailscale-only mesh with no public ingress and no LAN exposure.
-      Containerized always-on stack — container management, uptime monitoring and
-      alerting, service dashboard, relational database, queue broker and bookkeeping —
-      every container under an explicit memory limit and a pinned image tag. Hybrid
-      local + hosted inference routing. Infrastructure-as-config repository with ADR
-      practice and secret scanning on every push.</p>
+    <div class="status-block running">
+      <span class="status-label">Running now</span>
+      <p>
+        Three-node role split with workloads placed by node
+        reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
+        firewall after an audit found Docker bypassing UFW (ADR-0002).
+        Containerized always-on stack — container management, uptime monitoring and
+        alerting, service dashboard, relational database, queue broker and bookkeeping —
+        every container under an explicit memory limit and a pinned image tag. Hybrid
+        local + hosted inference routing. Infrastructure-as-config repository with ADR
+        practice and secret scanning on every push.
+      </p>
     </div>
 
-    <div class="status-item">
-      <p><span class="status-label progress">In progress.</span> Metrics collection and time-series dashboards, deployed but not
-      yet configured. Host and GPU exporters. API spend dashboard widget.</p>
+    <div class="status-block progress">
+      <span class="status-label">In progress</span>
+      <p>
+        Metrics collection and time-series dashboards, deployed but not
+        yet configured. Host and GPU exporters. API spend dashboard widget.
+      </p>
     </div>
 
-    <div class="status-item">
-      <p><span class="status-label next">Next.</span> Raspberry Pi watchdog node, and with it the ADR-0001 migration of
-      uptime monitoring off the host it monitors. DNS filtering. Workflow
-      orchestration and document management. Single sign-on and tailnet ACLs. The
-      agent orchestration cluster described above.</p>
+    <div class="status-block next">
+      <span class="status-label">Next</span>
+      <p>
+        Raspberry Pi watchdog node, and with it the ADR-0001 migration of
+        uptime monitoring off the host it monitors. DNS filtering. Workflow
+        orchestration and document management. Single sign-on and tailnet ACLs. The
+        agent orchestration cluster described above.
+      </p>
     </div>
   </section>
 
@@ -582,6 +628,9 @@
   </section>
 
   <footer>
-    <p>Homelab — infrastructure-as-config.</p>
+    <p>Homelab — infrastructure-as-config, built and documented in public.</p>
   </footer>
+
 </main>
+</body>
+</html>
