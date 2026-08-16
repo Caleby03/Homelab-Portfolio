@@ -6,28 +6,99 @@
 <title>Homelab</title>
 <style>
   :root {
-    --bg: #12141a;
-    --bg-raised: #181b22;
-    --border: #2a2e38;
-    --text: #e8eaef;
-    --text-dim: #a8adba;
-    --text-faint: #7c8191;
-    --accent: #7aa2ff;
-    --green: #4caf7d;
-    --green-bg: rgba(76, 175, 125, 0.12);
-    --green-border: rgba(76, 175, 125, 0.45);
-    --amber: #d9a441;
-    --amber-bg: rgba(217, 164, 65, 0.12);
-    --amber-border: rgba(217, 164, 65, 0.45);
-    --grey: #9096a3;
-    --grey-bg: rgba(144, 150, 163, 0.10);
-    --grey-border: rgba(144, 150, 163, 0.40);
-    --code-bg: #21242e;
-    --code-text: #d7c9ff;
-    --callout-bg: rgba(217, 164, 65, 0.10);
-    --callout-border: #d9a441;
-    --highlight-bg: #1b2030;
-    --highlight-border: #7aa2ff;
+    --bg: #0a0c10;
+    --panel-bg: #12151b;
+    --panel-header-bg: #171b22;
+    --panel-bg-nested: #0f1216;
+    --border: #242933;
+    --border-strong: #333a49;
+    --text: #e7eaf1;
+    --text-dim: #9aa3b5;
+    --text-faint: #6c7385;
+
+    --accent: #8ba0d6;
+    --accent-border: rgba(139, 160, 214, 0.45);
+    --accent-soft: rgba(139, 160, 214, 0.08);
+
+    /* ---------- Status semantics — meaning is fixed, do not remap roles ----------
+       GREEN = built / running now · AMBER = in progress · ROSE = planned / not yet built.
+       Used by: header status dot, the featured Docker firewall-bypass panel, the three
+       Build-status cards, and the Planned-orchestration callout. Saturation may be
+       enriched, but these three hues must never represent anything else on the page. */
+    --green: #5fcf8f;
+    --green-bg: rgba(95, 207, 143, 0.09);
+    --green-border: rgba(95, 207, 143, 0.42);
+    --green-pill-bg: rgba(95, 207, 143, 0.17);
+    --green-label: #a0e8bf;
+
+    --amber: #e3b768;
+    --amber-bg: rgba(227, 183, 104, 0.09);
+    --amber-border: rgba(227, 183, 104, 0.42);
+    --amber-pill-bg: rgba(227, 183, 104, 0.17);
+
+    --rose: #d99287;
+    --rose-bg: rgba(217, 146, 135, 0.09);
+    --rose-border: rgba(217, 146, 135, 0.44);
+    --rose-pill-bg: rgba(217, 146, 135, 0.18);
+    --rose-label: #edb2a8;
+
+    /* ---------- Panel accent palette ----------
+       One deliberate, non-semantic hue per dashboard panel, assigned in scroll order so
+       the page reads as a considered arc rather than a random assortment: it opens cool
+       (cyan), moves through the green family for the "what's running" panel, settles into
+       the weightier indigo/violet for the security and decisions panels, blue for the
+       motion of migrations, reuses the semantic rose for the "planned" panel (the meaning
+       already fits), a quiet slate to host the tri-color build-status grid without
+       competing with it, and closes on a warm copper note. Each hue ships a base color,
+       a border/led variant, a low-alpha background wash, and a lighter "label" tint sized
+       for small mono text on the dark header strip. Retune by hand here. */
+    --cyan: #4fb4c7;
+    --cyan-border: rgba(79, 180, 199, 0.45);
+    --cyan-bg: rgba(79, 180, 199, 0.09);
+    --cyan-label: #92d8e8;
+
+    --emerald: #45c98c;
+    --emerald-border: rgba(69, 201, 140, 0.45);
+    --emerald-bg: rgba(69, 201, 140, 0.09);
+    --emerald-label: #89e2b9;
+
+    --teal: #3fada0;
+    --teal-border: rgba(63, 173, 160, 0.45);
+    --teal-bg: rgba(63, 173, 160, 0.09);
+    --teal-label: #82d2c6;
+
+    --indigo: #7b81e0;
+    --indigo-border: rgba(123, 129, 224, 0.45);
+    --indigo-bg: rgba(123, 129, 224, 0.09);
+    --indigo-label: #b4b7f2;
+
+    --violet: #a978d9;
+    --violet-border: rgba(169, 120, 217, 0.45);
+    --violet-bg: rgba(169, 120, 217, 0.09);
+    --violet-label: #d0acf0;
+
+    --blue: #5a93e0;
+    --blue-border: rgba(90, 147, 224, 0.45);
+    --blue-bg: rgba(90, 147, 224, 0.09);
+    --blue-label: #a3c3f4;
+
+    --slate: #7c8fc4;
+    --slate-border: rgba(124, 143, 196, 0.42);
+    --slate-bg: rgba(124, 143, 196, 0.08);
+    --slate-label: #b6c2e8;
+
+    --copper: #d1935f;
+    --copper-border: rgba(209, 147, 95, 0.44);
+    --copper-bg: rgba(209, 147, 95, 0.09);
+    --copper-label: #ecbc90;
+
+    --code-bg: #1a1e26;
+    --code-text: #c9beea;
+
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   * { box-sizing: border-box; }
@@ -40,51 +111,106 @@
   }
 
   body {
-    background: var(--bg);
+    background-color: var(--bg);
+    /* Dot/line grid on top; three faint multi-hue washes underneath give the page
+       gentle color depth as you scroll, without ever sitting under text (panels are
+       opaque) so body-text contrast is untouched. */
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      radial-gradient(ellipse 80% 55% at 12% 0%, rgba(79, 180, 199, 0.07), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 100% 35%, rgba(169, 120, 217, 0.055), transparent 62%),
+      radial-gradient(ellipse 90% 65% at 25% 100%, rgba(209, 147, 95, 0.05), transparent 65%);
+    background-size: 22px 22px, 44px 44px, 44px 44px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: -11px -11px, -1px -1px, -1px -1px, 0 0, 0 0, 0 0;
+    background-repeat: repeat, repeat, repeat, no-repeat, no-repeat, no-repeat;
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.7;
-    font-size: 17px;
+    font-family: var(--sans);
+    line-height: 1.65;
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
   }
 
   main {
-    max-width: 860px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 48px 24px 96px;
+    padding: 32px 20px 90px;
   }
 
+  a { color: var(--accent); text-decoration-color: var(--accent-border); }
+  a:hover { color: var(--cyan-label); text-decoration-color: var(--cyan); }
+
+  /* ---------- Hero ---------- */
+
   header.page-header {
-    margin-bottom: 40px;
+    border: 1px solid var(--border-strong);
+    background: var(--panel-bg);
+    padding: 30px 32px 34px;
+    margin-bottom: 28px;
+  }
+
+  .status-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-strip .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px var(--green-bg);
+    flex: none;
   }
 
   h1 {
-    font-size: 2.1em;
+    font-family: var(--sans);
+    font-size: clamp(1.9rem, 4vw + 0.6rem, 2.7rem);
     font-weight: 700;
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
+    line-height: 1.08;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
     color: var(--text);
   }
 
-  h2 {
-    font-size: 1.5em;
-    font-weight: 700;
-    margin: 0 0 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    letter-spacing: -0.01em;
+  header.page-header p { max-width: 660px; }
+
+  header.page-header p:nth-of-type(1) { font-size: 1.05em; color: var(--text-dim); }
+  header.page-header p:nth-of-type(2) { color: var(--text-faint); }
+
+  .entrance {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: entranceRise 0.7s var(--ease) forwards;
   }
+
+  header.page-header .status-strip.entrance { animation-delay: 0s; }
+  header.page-header h1.entrance { animation-delay: 0.08s; }
+  header.page-header p.entrance:nth-of-type(1) { animation-delay: 0.16s; }
+  header.page-header p.entrance:nth-of-type(2) { animation-delay: 0.24s; }
+
+  @keyframes entranceRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Typography ---------- */
 
   h3 {
-    font-size: 1.15em;
-    font-weight: 600;
-    margin: 28px 0 12px;
+    font-size: 1.05em;
+    font-weight: 650;
+    margin: 26px 0 10px;
+    letter-spacing: -0.01em;
     color: var(--text);
   }
 
   p {
-    margin: 0 0 16px;
+    margin: 0 0 14px;
     color: var(--text-dim);
   }
 
@@ -95,193 +221,454 @@
     font-weight: 600;
   }
 
-  em {
-    font-style: italic;
-  }
-
-  section {
-    margin-bottom: 44px;
-  }
-
-  hr {
-    display: none;
-  }
+  em { font-style: italic; }
 
   ul {
-    margin: 0 0 16px;
-    padding-left: 1.3em;
+    margin: 0 0 14px;
+    padding-left: 1.2em;
     color: var(--text-dim);
   }
 
   li {
-    margin-bottom: 10px;
-    padding-left: 4px;
+    margin-bottom: 9px;
+    padding: 2px 8px 2px 4px;
+    margin-left: -4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
   }
 
   li:last-child { margin-bottom: 0; }
 
-  li p { margin-bottom: 6px; }
+  li:hover { background: var(--accent-soft); }
 
   code {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: var(--mono);
     background: var(--code-bg);
     color: var(--code-text);
-    padding: 0.15em 0.45em;
+    padding: 0.15em 0.42em;
     border-radius: 4px;
-    font-size: 0.87em;
+    font-size: 0.86em;
     white-space: nowrap;
   }
 
-  /* Tables */
+  /* ---------- Panels ---------- */
+
+  .panel {
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--border-strong);
+    background: var(--panel-bg);
+    margin-bottom: 22px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .panel:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 6px 20px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  /* "What is running" keeps a green-family identity (it literally lists what's built
+     and running) but uses the emerald shade, not the reserved semantic --green, so it
+     reads as its own panel hue rather than colliding with the Build-status "Running
+     now" card. */
+  .panel--green { border-top-color: var(--emerald-border); }
+  .panel--green .panel-header { border-bottom-color: var(--emerald-border); }
+  .panel--green .panel-header h2 { color: var(--emerald-label); }
+  .panel--green:hover { border-color: var(--emerald-border); box-shadow: 0 14px 32px -20px rgba(69, 201, 140, 0.35); }
+
+  /* "Planned — agent orchestration" keeps the true semantic rose: the panel's own
+     content is the "not yet built" callout, so hue and meaning already agree. */
+  .panel--rose  { border-top-color: var(--rose-border); }
+  .panel--rose .panel-header { border-bottom-color: var(--rose-border); }
+  .panel--rose .panel-header h2 { color: var(--rose-label); }
+  .panel--rose:hover { border-color: var(--rose-border); box-shadow: 0 14px 32px -20px rgba(217, 146, 135, 0.35); }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 22px;
+    background: var(--panel-header-bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-header h2 {
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .panel-led {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex: none;
+  }
+
+  .panel--green .panel-led { background: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-bg); }
+  .panel--rose .panel-led  { background: var(--rose);  box-shadow: 0 0 0 3px var(--rose-bg); }
+  .panel:not(.panel--green):not(.panel--rose) .panel-led { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .panel-body {
+    padding: 22px 26px 24px;
+  }
+
+  .panel-body > p:first-child,
+  .panel-body > ul:first-child { margin-top: 0; }
+
+  /* ---------- Tables ---------- */
+
   .table-wrap {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 0 0 16px;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    -webkit-overflow-scrolling: touch;
   }
 
   table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 480px;
-    font-size: 0.95em;
+    min-width: 460px;
+    font-size: 0.92em;
   }
 
   th, td {
     text-align: left;
-    padding: 10px 16px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
 
   th {
-    background: var(--bg-raised);
-    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.78em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--panel-header-bg);
+    color: var(--accent);
     font-weight: 600;
   }
 
   td {
     color: var(--text-dim);
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
   tr:last-child td { border-bottom: none; }
 
-  /* Callout for "not running today" */
+  tbody tr { transition: background 0.15s ease; }
+
+  tbody tr:hover { background: var(--accent-soft); }
+  tbody tr:hover td { color: var(--text); }
+
+  .panel--green table thead th { border-bottom-color: var(--emerald-border); color: var(--emerald-label); }
+  .panel--green tbody tr:hover { background: var(--emerald-bg); }
+
+  /* ---------- Per-panel accent (Architecture, Operational practice, Network
+     security model, Architecture decisions, Migrations, Build status, Note on
+     scope — the panels without a dedicated modifier class) ---------- */
+
+  #architecture { border-top-color: var(--cyan-border); }
+  #architecture .panel-header { border-bottom-color: var(--cyan-border); }
+  #architecture .panel-header h2 { color: var(--cyan-label); }
+  #architecture .panel-led { background: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-bg); }
+  #architecture:hover { border-color: var(--cyan-border); box-shadow: 0 14px 32px -20px rgba(79, 180, 199, 0.32); }
+  #architecture table thead th { border-bottom-color: var(--cyan-border); color: var(--cyan-label); }
+  #architecture tbody tr:hover { background: var(--cyan-bg); }
+
+  #operational-practice { border-top-color: var(--teal-border); }
+  #operational-practice .panel-header { border-bottom-color: var(--teal-border); }
+  #operational-practice .panel-header h2 { color: var(--teal-label); }
+  #operational-practice .panel-led { background: var(--teal); box-shadow: 0 0 0 3px var(--teal-bg); }
+  #operational-practice:hover { border-color: var(--teal-border); box-shadow: 0 14px 32px -20px rgba(63, 173, 160, 0.32); }
+  #operational-practice li:hover { background: var(--teal-bg); }
+  #operational-practice code { background: rgba(63, 173, 160, 0.14); color: var(--teal-label); }
+
+  #network-security-model { border-top-color: var(--indigo-border); }
+  #network-security-model .panel-header { border-bottom-color: var(--indigo-border); }
+  #network-security-model .panel-header h2 { color: var(--indigo-label); }
+  #network-security-model .panel-led { background: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-bg); }
+  #network-security-model:hover { border-color: var(--indigo-border); box-shadow: 0 14px 32px -20px rgba(123, 129, 224, 0.32); }
+  #network-security-model li:hover { background: var(--indigo-bg); }
+  #network-security-model code { background: rgba(123, 129, 224, 0.14); color: var(--indigo-label); }
+  /* The featured panel below keeps its own built/green identity even though it lives
+     inside the indigo security section — code chips inside it stay green, not indigo. */
+  #network-security-model .feature-panel code { background: rgba(95, 207, 143, 0.16); color: var(--green-label); }
+
+  #architecture-decisions { border-top-color: var(--violet-border); }
+  #architecture-decisions .panel-header { border-bottom-color: var(--violet-border); }
+  #architecture-decisions .panel-header h2 { color: var(--violet-label); }
+  #architecture-decisions .panel-led { background: var(--violet); box-shadow: 0 0 0 3px var(--violet-bg); }
+  #architecture-decisions:hover { border-color: var(--violet-border); box-shadow: 0 14px 32px -20px rgba(169, 120, 217, 0.32); }
+
+  #migrations { border-top-color: var(--blue-border); }
+  #migrations .panel-header { border-bottom-color: var(--blue-border); }
+  #migrations .panel-header h2 { color: var(--blue-label); }
+  #migrations .panel-led { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+  #migrations:hover { border-color: var(--blue-border); box-shadow: 0 14px 32px -20px rgba(90, 147, 224, 0.32); }
+  #migrations li:hover { background: var(--blue-bg); }
+  #migrations code { background: rgba(90, 147, 224, 0.14); color: var(--blue-label); }
+
+  #build-status { border-top-color: var(--slate-border); }
+  #build-status .panel-header { border-bottom-color: var(--slate-border); }
+  #build-status .panel-header h2 { color: var(--slate-label); }
+  #build-status .panel-led { background: var(--slate); box-shadow: 0 0 0 3px var(--slate-bg); }
+  #build-status:hover { border-color: var(--slate-border); box-shadow: 0 14px 32px -20px rgba(124, 143, 196, 0.3); }
+
+  #note-on-scope { border-top-color: var(--copper-border); }
+  #note-on-scope .panel-header { border-bottom-color: var(--copper-border); }
+  #note-on-scope .panel-header h2 { color: var(--copper-label); }
+  #note-on-scope .panel-led { background: var(--copper); box-shadow: 0 0 0 3px var(--copper-bg); }
+  #note-on-scope:hover { border-color: var(--copper-border); box-shadow: 0 14px 32px -20px rgba(209, 147, 95, 0.3); }
+
+  /* ---------- Callout ---------- */
+
   .callout {
-    background: var(--callout-bg);
-    border: 1px solid var(--callout-border);
-    border-left-width: 4px;
-    border-radius: 6px;
-    padding: 14px 18px;
-    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--rose-bg);
+    border: 1px solid var(--rose-border);
+    padding: 12px 16px;
+    margin: 0 0 16px;
     font-weight: 600;
-    color: var(--text);
   }
 
-  .callout p {
+  .callout::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--rose);
+    box-shadow: 0 0 0 3px var(--rose-pill-bg);
+    flex: none;
+  }
+
+  .callout p { margin: 0; color: var(--text); }
+
+  /* ---------- Feature panel: centerpiece ---------- */
+
+  .feature-panel {
+    /* Deliberately the strongest treatment on the page: thicker rail, layered glow,
+       a subtle diagonal wash in the header — this must stay the most prominent
+       element even as the rest of the panels pick up more color. */
+    position: relative;
+    background: var(--panel-bg-nested);
+    border: 1px solid var(--green-border);
+    border-left: 5px solid var(--green);
+    margin: 26px 0 20px;
+    box-shadow:
+      0 24px 56px -28px rgba(95, 207, 143, 0.45),
+      0 4px 18px -8px rgba(95, 207, 143, 0.22);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .feature-panel:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 28px 64px -26px rgba(95, 207, 143, 0.58),
+      0 6px 22px -8px rgba(95, 207, 143, 0.3);
+  }
+
+  .feature-panel .feature-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: linear-gradient(120deg, var(--green-bg), rgba(95, 207, 143, 0.02) 70%);
+    border-bottom: 1px solid var(--green-border);
+  }
+
+  .feature-panel .feature-header .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px var(--green-pill-bg);
+    flex: none;
+  }
+
+  .feature-panel h3 {
     margin: 0;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
     color: var(--text);
   }
 
-  /* Highlighted subsection: Docker firewall bypass */
-  .highlight-panel {
-    background: var(--highlight-bg);
-    border-left: 4px solid var(--highlight-border);
-    border-radius: 6px;
-    padding: 4px 24px 20px;
-    margin: 28px 0;
+  .feature-panel .feature-body {
+    padding: 20px 24px 22px;
   }
 
-  .highlight-panel h3 {
-    margin-top: 20px;
+  /* ---------- Build status ---------- */
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
   }
 
-  /* Build status badges */
-  .status-block {
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin-bottom: 16px;
+  .status-panel {
     border: 1px solid var(--border);
+    background: var(--panel-bg-nested);
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .status-block:last-child { margin-bottom: 0; }
-
-  .status-block p {
-    color: var(--text-dim);
-    margin: 0;
+  .status-panel:hover {
+    transform: translateY(-2px);
   }
 
-  .status-label {
-    display: inline-block;
-    font-weight: 700;
-    font-size: 0.78em;
-    letter-spacing: 0.06em;
+  .status-panel .status-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-panel .status-pill {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 100px;
-    margin-bottom: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
   }
 
-  .status-block.running {
-    background: var(--green-bg);
-    border-color: var(--green-border);
-  }
-  .status-block.running .status-label {
-    background: var(--green-border);
-    color: #0d1912;
-  }
+  .status-panel .status-body { padding: 16px 18px 18px; }
+  .status-panel .status-body p { margin: 0; font-size: 0.93em; }
 
-  .status-block.progress {
-    background: var(--amber-bg);
-    border-color: var(--amber-border);
-  }
-  .status-block.progress .status-label {
-    background: var(--amber-border);
-    color: #211703;
-  }
+  .status-panel--green { border-top: 3px solid var(--green-border); }
+  .status-panel--green .status-header { background: var(--green-bg); }
+  .status-panel--green .status-pill { color: var(--green); background: var(--green-pill-bg); border-color: var(--green-border); }
+  .status-panel--green:hover { border-color: var(--green-border); box-shadow: 0 14px 32px -20px rgba(95, 207, 143, 0.4); }
 
-  .status-block.next {
-    background: var(--grey-bg);
-    border-color: var(--grey-border);
-  }
-  .status-block.next .status-label {
-    background: var(--grey-border);
-    color: #14161b;
-  }
+  .status-panel--amber { border-top: 3px solid var(--amber-border); }
+  .status-panel--amber .status-header { background: var(--amber-bg); }
+  .status-panel--amber .status-pill { color: var(--amber); background: var(--amber-pill-bg); border-color: var(--amber-border); }
+  .status-panel--amber:hover { border-color: var(--amber-border); box-shadow: 0 14px 32px -20px rgba(227, 183, 104, 0.4); }
+
+  .status-panel--rose { border-top: 3px solid var(--rose-border); }
+  .status-panel--rose .status-header { background: var(--rose-bg); }
+  .status-panel--rose .status-pill { color: var(--rose); background: var(--rose-pill-bg); border-color: var(--rose-border); }
+  .status-panel--rose:hover { border-color: var(--rose-border); box-shadow: 0 14px 32px -20px rgba(217, 146, 135, 0.4); }
 
   footer {
-    margin-top: 56px;
-    padding-top: 24px;
+    margin-top: 36px;
+    padding-top: 18px;
     border-top: 1px solid var(--border);
     color: var(--text-faint);
-    font-size: 0.9em;
+    font-size: 0.85em;
   }
 
   footer p { color: var(--text-faint); margin: 0; }
 
+  /* ---------- Scroll reveal ---------- */
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-child {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+
+  .reveal.visible .reveal-child {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width: 760px) {
+    .status-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    header.page-header { padding: 24px 20px 26px; }
+    .panel-body { padding: 18px 18px 20px; }
+    .feature-panel .feature-body { padding: 16px 18px 18px; }
+  }
+
   @media (max-width: 480px) {
-    body { font-size: 16px; }
-    main { padding: 32px 16px 72px; }
-    h1 { font-size: 1.7em; }
-    h2 { font-size: 1.3em; }
-    .highlight-panel { padding: 4px 16px 16px; }
+    body { font-size: 15px; }
+    main { padding: 20px 12px 60px; }
+    h1 { font-size: 1.6rem; }
+    .panel-header { padding: 11px 16px; }
+    .panel-body { padding: 16px 14px 18px; }
+    .feature-panel .feature-header { padding: 12px 16px; }
+    .feature-panel .feature-body { padding: 14px 16px 16px; }
+    th, td { padding: 9px 11px; }
+  }
+
+  /* ---------- Reduced motion ---------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .entrance {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .reveal,
+    .reveal-child {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .panel:hover,
+    .feature-panel:hover,
+    .status-panel:hover,
+    tbody tr:hover {
+      transform: none;
+    }
   }
 </style>
+<noscript>
+  <style>
+    /* JS disabled: scroll-reveal never runs, so force final visible state.
+       Without this the page renders blank below the hero. */
+    .reveal, .reveal-child { opacity: 1 !important; transform: none !important; }
+  </style>
+</noscript>
 </head>
 <body>
 <main>
 
   <header class="page-header">
-    <h1>Homelab</h1>
-    <p>
+    <div class="status-strip entrance"><span class="dot" aria-hidden="true"></span></div>
+    <h1 class="entrance">Homelab</h1>
+    <p class="entrance">
       A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
       7050 Micro hosting the stateful container stack, a Windows gaming desktop
       (Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU capacity, and a
       Raspberry Pi as an independent watchdog. All inter-node traffic runs over
       Tailscale; nothing is exposed to the LAN or the public internet.
     </p>
-    <p>
+    <p class="entrance">
       The point of the project is not the hardware. It is that every node is assigned
       work it is actually suited to, every container is capacity-bounded, and the
       monitoring is designed around the assumption that any given node will fail —
@@ -289,342 +676,373 @@
     </p>
   </header>
 
-  <section id="architecture">
-    <h2>Architecture</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Pi (Node C)</th>
-            <th>OptiPlex (Node B)</th>
-            <th>Desktop (Node A)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Defining trait</strong></td>
-            <td>~5W, never off</td>
-            <td>i7, 16GB, always on</td>
-            <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
-          </tr>
-          <tr>
-            <td><strong>Failure mode</strong></td>
-            <td>SD card death</td>
-            <td>OOM, disk fill</td>
-            <td>You start a game</td>
-          </tr>
-          <tr>
-            <td><strong>Good at</strong></td>
-            <td>Watchdog, DNS</td>
-            <td>Stateful services</td>
-            <td>Burst compute</td>
-          </tr>
-          <tr>
-            <td><strong>Bad at</strong></td>
-            <td>Anything heavy</td>
-            <td>Sustained CPU/GPU</td>
-            <td>Being available</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <section id="architecture" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Architecture</h2></div>
+    <div class="panel-body">
+      <div class="table-wrap reveal-child">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Pi (Node C)</th>
+              <th>OptiPlex (Node B)</th>
+              <th>Desktop (Node A)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Defining trait</strong></td>
+              <td>~5W, never off</td>
+              <td>i7, 16GB, always on</td>
+              <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Failure mode</strong></td>
+              <td>SD card death</td>
+              <td>OOM, disk fill</td>
+              <td>You start a game</td>
+            </tr>
+            <tr>
+              <td><strong>Good at</strong></td>
+              <td>Watchdog, DNS</td>
+              <td>Stateful services</td>
+              <td>Burst compute</td>
+            </tr>
+            <tr>
+              <td><strong>Bad at</strong></td>
+              <td>Anything heavy</td>
+              <td>Sustained CPU/GPU</td>
+              <td>Being available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <h3>Why the work is split this way</h3>
-    <p>
-      <strong>The desktop is unreliable by design.</strong> It is a gaming machine first, so it
-      disappears without warning. That is treated as an input, not a defect: nothing
-      stateful is placed on it, it owns no queue, and no alert fires when it vanishes.
-      Alerting on a node that is <em>expected</em> to go offline just trains alert-blindness.
-      What it is genuinely good at is burst GPU work, so that is all it gets —
-      inference and headless browser workers, both of which can fail and be retried.
-    </p>
-    <p>
-      <strong>The OptiPlex holds anything that must survive a reboot.</strong> Databases, the queue
-      broker, dashboards, bookkeeping. It is the only node with a real availability
-      guarantee, so it is the only node trusted with state.
-    </p>
-    <p>
-      <strong>Headless browser work runs on the desktop, orchestrated from the OptiPlex.</strong>
-      Each Chromium worker costs 300–500MB. Running a scraping pipeline on a 16GB box
-      alongside the databases would flatten it. Splitting orchestration from execution
-      means the small always-on node keeps the queue and the state, while the big
-      unreliable node does the expensive, interruptible part.
-    </p>
-    <p>
-      <strong>The Pi exists to watch the others.</strong> ~5W, separate power draw, separate
-      storage, separate failure modes — see ADR-0001.
-    </p>
-  </section>
-
-  <section id="what-is-running">
-    <h2>What is running</h2>
-    <p>Containerized on the always-on node, managed through Portainer:</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Role</th>
-            <th>Component</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Container management</td>
-            <td>Portainer</td>
-          </tr>
-          <tr>
-            <td>Uptime monitoring and alerting</td>
-            <td>Uptime Kuma</td>
-          </tr>
-          <tr>
-            <td>Service dashboard</td>
-            <td>Homepage</td>
-          </tr>
-          <tr>
-            <td>Relational database</td>
-            <td>PostgreSQL, with pgAdmin</td>
-          </tr>
-          <tr>
-            <td>Queue broker</td>
-            <td>Redis</td>
-          </tr>
-          <tr>
-            <td>Double-entry bookkeeping</td>
-            <td>Manager.io</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p>
-      Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
-      the host/GPU exporters) are deployed but not yet configured — see Build status.
-    </p>
-  </section>
-
-  <section id="operational-practice">
-    <h2>Operational practice</h2>
-    <p>Conventions applied across every compose file in the private config repo:</p>
-    <ul>
-      <li><strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
-        is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
-        sized deliberately so it fits alongside the services it observes.</li>
-      <li><strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
-        reproduces the same stack rather than silently pulling a new major version.</li>
-      <li><strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
-        state deliberately is not. The repo plus a Tailscale login is the rebuild path.</li>
-      <li><strong>Reachability is a firewall property, not a bind-address property.</strong> Docker
-        continues to listen on all interfaces so containers can reach one another and
-        the host; the packet filter is what decides who gets through. See Network
-        security model.</li>
-      <li><strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
-        what makes a service portable between nodes: moving it becomes a volume copy
-        rather than a config rewrite. The one exception is Docker port bindings, which
-        require a literal address at bind time.</li>
-      <li><strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
-        documents every variable with placeholder values, and <code>gitleaks</code> runs against
-        staged changes before every push.</li>
-    </ul>
-  </section>
-
-  <section id="network-security-model">
-    <h2>Network security model</h2>
-    <p>
-      The design goal is that nothing is reachable without authenticating first, and
-      that being on the same physical network grants nothing at all.
-    </p>
-    <ul>
-      <li><strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
-        carries all inter-node traffic. There is no port forwarding on the router, no
-        reverse proxy exposed to the internet, and no public ingress of any kind.</li>
-      <li><strong>Access is authenticated per device, not per network.</strong> A machine reaches
-        services because it has authenticated onto the tailnet — not because it
-        happens to sit on the right LAN. Revoking a device removes its access
-        everywhere at once, rather than requiring a firewall change.</li>
-      <li><strong>The firewall is the enforcement boundary.</strong> Docker deliberately still
-        listens on all interfaces, so containers and the host can talk to each other
-        without special-casing every service. External traffic is filtered in the
-        <code>DOCKER-USER</code> chain — evaluated ahead of Docker's own accept rules — so only
-        packets arriving over the Tailscale interface reach a published port. Host
-        SSH is restricted to the same interface via UFW.</li>
-      <li><strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
-        publishes, so an exporter cannot be scraped from anywhere else.</li>
-      <li><strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
-        documents every required variable with placeholder values, and <code>gitleaks</code> is
-        run against staged changes before every push.</li>
-    </ul>
-
-    <div class="highlight-panel">
-      <h3>Closing a real gap: Docker's firewall bypass</h3>
-      <p>
-        The tailnet-only property was originally enforced by convention — every
-        published port was expected to carry an explicit bind address. Auditing it
-        showed that convention was not holding, and published container ports were
-        reachable from the LAN.
+      <h3 class="reveal-child">Why the work is split this way</h3>
+      <p class="reveal-child">
+        <strong>The desktop is unreliable by design.</strong> It is a gaming machine first, so it
+        disappears without warning. That is treated as an input, not a defect: nothing
+        stateful is placed on it, it owns no queue, and no alert fires when it vanishes.
+        Alerting on a node that is <em>expected</em> to go offline just trains alert-blindness.
+        What it is genuinely good at is burst GPU work, so that is all it gets —
+        inference and headless browser workers, both of which can fail and be retried.
       </p>
-      <p>
-        The cause is a well-known and easily-missed Docker behaviour: publishing a port
-        inserts iptables rules that are evaluated <em>before</em> the chain UFW manages. A
-        <code>deny incoming</code> default policy therefore does not block a published container
-        port. UFW reports the host as locked down while Docker has already accepted the
-        traffic.
+      <p class="reveal-child">
+        <strong>The OptiPlex holds anything that must survive a reboot.</strong> Databases, the queue
+        broker, dashboards, bookkeeping. It is the only node with a real availability
+        guarantee, so it is the only node trusted with state.
       </p>
-      <p>
-        That is the worst class of security bug in a homelab — not an open port, but a
-        system that reports itself as closed while it is open, so everything built on
-        top of it inherits a false assumption. The fix was to stop treating bind
-        addresses as a security control and put enforcement in the packet filter
-        instead: rules in the <code>DOCKER-USER</code> chain, which is evaluated ahead of Docker's
-        own accept rules, admit only traffic arriving over the Tailscale interface.
-        Host SSH was locked to that same interface with UFW. Containers still listen
-        broadly so they can reach one another and the host — reachability is decided at
-        the filter, not at the socket.
+      <p class="reveal-child">
+        <strong>Headless browser work runs on the desktop, orchestrated from the OptiPlex.</strong>
+        Each Chromium worker costs 300–500MB. Running a scraping pipeline on a 16GB box
+        alongside the databases would flatten it. Splitting orchestration from execution
+        means the small always-on node keeps the queue and the state, while the big
+        unreliable node does the expensive, interruptible part.
       </p>
-      <p>
-        The tradeoff is deliberate and worth stating: enforcement is now a single
-        control rather than layered. Because the listening sockets remain open on all
-        interfaces, the firewall rules are load-bearing, which makes their persistence
-        across reboots and Docker restarts a first-class operational concern rather
-        than a detail.
-      </p>
-      <p>
-        Recorded as ADR-0002, with a runbook covering verification — which has to be
-        done from a LAN host that is not on the tailnet, since checking from the host
-        itself passes trivially and proves nothing.
-      </p>
-    </div>
-
-    <p>
-      Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
-      restricting which node may reach which service, and network isolation for agent
-      runtimes so a runtime cannot reach the rest of the stack.
-    </p>
-  </section>
-
-  <section id="architecture-decisions">
-    <h2>Architecture decisions</h2>
-    <p>
-      Decisions are recorded as ADRs at the time they are made, rather than
-      reconstructed afterwards. The configs show <em>what</em> runs; the ADRs record <em>why</em>.
-    </p>
-    <p>
-      <strong>ADR-0001 — monitoring moved off the box it monitors.</strong> Uptime Kuma was
-      originally installed on the OptiPlex, simply because that is where everything
-      else already lived. That made the OptiPlex a single point of failure for knowing
-      whether the OptiPlex was up: if it OOMs, fills its disk, or reboots for updates,
-      monitoring stops at the same instant the thing being monitored stops — and the
-      failure is silent, because the alerting is part of the outage. Alerting must not
-      share a failure domain with the thing it watches. Uptime Kuma therefore moves to
-      the Pi: an independent observer with its own power, storage and failure modes.
-    </p>
-    <p>
-      Prometheus, Grafana and Homepage deliberately stay on the OptiPlex. They serve a
-      different purpose — diagnosis after the fact, not notification in the moment.
-      Only the second needs to survive the outage. A dashboard being unreachable
-      during an outage is accepted: during an outage there is nothing to look at.
-    </p>
-    <p>
-      <strong>Alerting deliberately excludes the desktop.</strong> Alerting on a node expected to
-      disappear produces noise, and noise produces ignored alerts.
-    </p>
-    <p>
-      <strong>A dedicated local AI node is deferred, with a defined trigger.</strong> The hybrid
-      local + hosted inference routing already covers the work the 2070 Super cannot.
-      A dedicated GPU build is deferred until a specific spend threshold is crossed,
-      rather than bought speculatively — the discipline being that hardware must fix a
-      fault that exists now, or remove a ceiling actually being hit.
-    </p>
-  </section>
-
-  <section id="migrations">
-    <h2>Migrations</h2>
-    <ul>
-      <li><strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
-        Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
-        is useful practice, and because every monitor targets a MagicDNS name rather
-        than an IP, the second pass is a volume copy rather than a rewrite.</li>
-      <li><strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
-        lifted a ceiling that was actually being hit, which is what justified it.</li>
-      <li><strong>Docker firewall lockdown.</strong> Audited the tailnet-only invariant, found
-        published container ports reachable from the LAN because Docker bypasses UFW,
-        and moved enforcement into the <code>DOCKER-USER</code> chain with SSH restricted via
-        UFW. See ADR-0002.</li>
-      <li><strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
-        values the dashboard displays, because the dashboard widget passes PromQL in a
-        URL query string and long expressions become an encoding problem. Collapsing
-        each to a single short metric name keeps the dashboard config readable.</li>
-    </ul>
-  </section>
-
-  <section id="planned-agent-orchestration">
-    <h2>Planned — agent orchestration</h2>
-    <div class="callout">
-      <p>Nothing in this section is running today.</p>
-    </div>
-    <p>
-      It is the next phase of the build, recorded here as direction rather than achievement.
-    </p>
-    <p>
-      The intent is a managed cluster of AI agents handling day-to-day operational
-      work — monitoring triage, routine maintenance, bookkeeping and document intake —
-      orchestrated from the always-on node, with GPU-heavy steps dispatched to the
-      desktop and hosted models used where local capacity falls short.
-    </p>
-    <p>
-      The placement logic is the same as everywhere else in this homelab: orchestration
-      and state on the reliable node, expensive interruptible compute on the unreliable
-      one. Agent runtimes are intended to be network-isolated from the rest of the
-      stack, so that a compromised or misbehaving runtime cannot reach the databases or
-      the queue broker.
-    </p>
-  </section>
-
-  <section id="build-status">
-    <h2>Build status</h2>
-    <p>
-      Built in public. This is a live project, so the page separates what runs today
-      from what is next — nothing below is listed as running unless it is.
-    </p>
-
-    <div class="status-block running">
-      <span class="status-label">Running now</span>
-      <p>
-        Three-node role split with workloads placed by node
-        reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
-        firewall after an audit found Docker bypassing UFW (ADR-0002).
-        Containerized always-on stack — container management, uptime monitoring and
-        alerting, service dashboard, relational database, queue broker and bookkeeping —
-        every container under an explicit memory limit and a pinned image tag. Hybrid
-        local + hosted inference routing. Infrastructure-as-config repository with ADR
-        practice and secret scanning on every push.
-      </p>
-    </div>
-
-    <div class="status-block progress">
-      <span class="status-label">In progress</span>
-      <p>
-        Metrics collection and time-series dashboards, deployed but not
-        yet configured. Host and GPU exporters. API spend dashboard widget.
-      </p>
-    </div>
-
-    <div class="status-block next">
-      <span class="status-label">Next</span>
-      <p>
-        Raspberry Pi watchdog node, and with it the ADR-0001 migration of
-        uptime monitoring off the host it monitors. DNS filtering. Workflow
-        orchestration and document management. Single sign-on and tailnet ACLs. The
-        agent orchestration cluster described above.
+      <p class="reveal-child">
+        <strong>The Pi exists to watch the others.</strong> ~5W, separate power draw, separate
+        storage, separate failure modes — see ADR-0001.
       </p>
     </div>
   </section>
 
-  <section id="note-on-scope">
-    <h2>Note on scope</h2>
-    <p>
-      This is the public view. The configuration itself, runbooks, network addressing,
-      port bindings and firewall rules live in a separate private repository.
-    </p>
+  <section id="what-is-running" class="reveal panel panel--green">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>What is running</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">Containerized on the always-on node, managed through Portainer:</p>
+      <div class="table-wrap reveal-child">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Component</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Container management</td>
+              <td>Portainer</td>
+            </tr>
+            <tr>
+              <td>Uptime monitoring and alerting</td>
+              <td>Uptime Kuma</td>
+            </tr>
+            <tr>
+              <td>Service dashboard</td>
+              <td>Homepage</td>
+            </tr>
+            <tr>
+              <td>Relational database</td>
+              <td>PostgreSQL, with pgAdmin</td>
+            </tr>
+            <tr>
+              <td>Queue broker</td>
+              <td>Redis</td>
+            </tr>
+            <tr>
+              <td>Double-entry bookkeeping</td>
+              <td>Manager.io</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="reveal-child">
+        Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
+        the host/GPU exporters) are deployed but not yet configured — see Build status.
+      </p>
+    </div>
+  </section>
+
+  <section id="operational-practice" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Operational practice</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">Conventions applied across every compose file in the private config repo:</p>
+      <ul>
+        <li class="reveal-child"><strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
+          is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
+          sized deliberately so it fits alongside the services it observes.</li>
+        <li class="reveal-child"><strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
+          reproduces the same stack rather than silently pulling a new major version.</li>
+        <li class="reveal-child"><strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
+          state deliberately is not. The repo plus a Tailscale login is the rebuild path.</li>
+        <li class="reveal-child"><strong>Reachability is a firewall property, not a bind-address property.</strong> Docker
+          continues to listen on all interfaces so containers can reach one another and
+          the host; the packet filter is what decides who gets through. See Network
+          security model.</li>
+        <li class="reveal-child"><strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
+          what makes a service portable between nodes: moving it becomes a volume copy
+          rather than a config rewrite. The one exception is Docker port bindings, which
+          require a literal address at bind time.</li>
+        <li class="reveal-child"><strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+          documents every variable with placeholder values, and <code>gitleaks</code> runs against
+          staged changes before every push.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="network-security-model" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Network security model</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">
+        The design goal is that nothing is reachable without authenticating first, and
+        that being on the same physical network grants nothing at all.
+      </p>
+      <ul>
+        <li class="reveal-child"><strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
+          carries all inter-node traffic. There is no port forwarding on the router, no
+          reverse proxy exposed to the internet, and no public ingress of any kind.</li>
+        <li class="reveal-child"><strong>Access is authenticated per device, not per network.</strong> A machine reaches
+          services because it has authenticated onto the tailnet — not because it
+          happens to sit on the right LAN. Revoking a device removes its access
+          everywhere at once, rather than requiring a firewall change.</li>
+        <li class="reveal-child"><strong>The firewall is the enforcement boundary.</strong> Docker deliberately still
+          listens on all interfaces, so containers and the host can talk to each other
+          without special-casing every service. External traffic is filtered in the
+          <code>DOCKER-USER</code> chain — evaluated ahead of Docker's own accept rules — so only
+          packets arriving over the Tailscale interface reach a published port. Host
+          SSH is restricted to the same interface via UFW.</li>
+        <li class="reveal-child"><strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
+          publishes, so an exporter cannot be scraped from anywhere else.</li>
+        <li class="reveal-child"><strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+          documents every required variable with placeholder values, and <code>gitleaks</code> is
+          run against staged changes before every push.</li>
+      </ul>
+
+      <div class="feature-panel reveal-child">
+        <div class="feature-header">
+          <span class="led" aria-hidden="true"></span>
+          <h3>Closing a real gap: Docker's firewall bypass</h3>
+        </div>
+        <div class="feature-body">
+          <p>
+            The tailnet-only property was originally enforced by convention — every
+            published port was expected to carry an explicit bind address. Auditing it
+            showed that convention was not holding, and published container ports were
+            reachable from the LAN.
+          </p>
+          <p>
+            The cause is a well-known and easily-missed Docker behaviour: publishing a port
+            inserts iptables rules that are evaluated <em>before</em> the chain UFW manages. A
+            <code>deny incoming</code> default policy therefore does not block a published container
+            port. UFW reports the host as locked down while Docker has already accepted the
+            traffic.
+          </p>
+          <p>
+            That is the worst class of security bug in a homelab — not an open port, but a
+            system that reports itself as closed while it is open, so everything built on
+            top of it inherits a false assumption. The fix was to stop treating bind
+            addresses as a security control and put enforcement in the packet filter
+            instead: rules in the <code>DOCKER-USER</code> chain, which is evaluated ahead of Docker's
+            own accept rules, admit only traffic arriving over the Tailscale interface.
+            Host SSH was locked to that same interface with UFW. Containers still listen
+            broadly so they can reach one another and the host — reachability is decided at
+            the filter, not at the socket.
+          </p>
+          <p>
+            The tradeoff is deliberate and worth stating: enforcement is now a single
+            control rather than layered. Because the listening sockets remain open on all
+            interfaces, the firewall rules are load-bearing, which makes their persistence
+            across reboots and Docker restarts a first-class operational concern rather
+            than a detail.
+          </p>
+          <p>
+            Recorded as ADR-0002, with a runbook covering verification — which has to be
+            done from a LAN host that is not on the tailnet, since checking from the host
+            itself passes trivially and proves nothing.
+          </p>
+        </div>
+      </div>
+
+      <p class="reveal-child">
+        Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
+        restricting which node may reach which service, and network isolation for agent
+        runtimes so a runtime cannot reach the rest of the stack.
+      </p>
+    </div>
+  </section>
+
+  <section id="architecture-decisions" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Architecture decisions</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">
+        Decisions are recorded as ADRs at the time they are made, rather than
+        reconstructed afterwards. The configs show <em>what</em> runs; the ADRs record <em>why</em>.
+      </p>
+      <p class="reveal-child">
+        <strong>ADR-0001 — monitoring moved off the box it monitors.</strong> Uptime Kuma was
+        originally installed on the OptiPlex, simply because that is where everything
+        else already lived. That made the OptiPlex a single point of failure for knowing
+        whether the OptiPlex was up: if it OOMs, fills its disk, or reboots for updates,
+        monitoring stops at the same instant the thing being monitored stops — and the
+        failure is silent, because the alerting is part of the outage. Alerting must not
+        share a failure domain with the thing it watches. Uptime Kuma therefore moves to
+        the Pi: an independent observer with its own power, storage and failure modes.
+      </p>
+      <p class="reveal-child">
+        Prometheus, Grafana and Homepage deliberately stay on the OptiPlex. They serve a
+        different purpose — diagnosis after the fact, not notification in the moment.
+        Only the second needs to survive the outage. A dashboard being unreachable
+        during an outage is accepted: during an outage there is nothing to look at.
+      </p>
+      <p class="reveal-child">
+        <strong>Alerting deliberately excludes the desktop.</strong> Alerting on a node expected to
+        disappear produces noise, and noise produces ignored alerts.
+      </p>
+      <p class="reveal-child">
+        <strong>A dedicated local AI node is deferred, with a defined trigger.</strong> The hybrid
+        local + hosted inference routing already covers the work the 2070 Super cannot.
+        A dedicated GPU build is deferred until a specific spend threshold is crossed,
+        rather than bought speculatively — the discipline being that hardware must fix a
+        fault that exists now, or remove a ceiling actually being hit.
+      </p>
+    </div>
+  </section>
+
+  <section id="migrations" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Migrations</h2></div>
+    <div class="panel-body">
+      <ul>
+        <li class="reveal-child"><strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
+          Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
+          is useful practice, and because every monitor targets a MagicDNS name rather
+          than an IP, the second pass is a volume copy rather than a rewrite.</li>
+        <li class="reveal-child"><strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
+          lifted a ceiling that was actually being hit, which is what justified it.</li>
+        <li class="reveal-child"><strong>Docker firewall lockdown.</strong> Audited the tailnet-only invariant, found
+          published container ports reachable from the LAN because Docker bypasses UFW,
+          and moved enforcement into the <code>DOCKER-USER</code> chain with SSH restricted via
+          UFW. See ADR-0002.</li>
+        <li class="reveal-child"><strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
+          values the dashboard displays, because the dashboard widget passes PromQL in a
+          URL query string and long expressions become an encoding problem. Collapsing
+          each to a single short metric name keeps the dashboard config readable.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="planned-agent-orchestration" class="reveal panel panel--rose">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Planned — agent orchestration</h2></div>
+    <div class="panel-body">
+      <div class="callout reveal-child">
+        <p>Nothing in this section is running today.</p>
+      </div>
+      <p class="reveal-child">
+        It is the next phase of the build, recorded here as direction rather than achievement.
+      </p>
+      <p class="reveal-child">
+        The intent is a managed cluster of AI agents handling day-to-day operational
+        work — monitoring triage, routine maintenance, bookkeeping and document intake —
+        orchestrated from the always-on node, with GPU-heavy steps dispatched to the
+        desktop and hosted models used where local capacity falls short.
+      </p>
+      <p class="reveal-child">
+        The placement logic is the same as everywhere else in this homelab: orchestration
+        and state on the reliable node, expensive interruptible compute on the unreliable
+        one. Agent runtimes are intended to be network-isolated from the rest of the
+        stack, so that a compromised or misbehaving runtime cannot reach the databases or
+        the queue broker.
+      </p>
+    </div>
+  </section>
+
+  <section id="build-status" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Build status</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">
+        Built in public. This is a live project, so the page separates what runs today
+        from what is next — nothing below is listed as running unless it is.
+      </p>
+
+      <div class="status-grid reveal-child">
+        <div class="status-panel status-panel--green">
+          <div class="status-header"><span class="status-pill">Running now</span></div>
+          <div class="status-body">
+            <p>
+              Three-node role split with workloads placed by node
+              reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
+              firewall after an audit found Docker bypassing UFW (ADR-0002).
+              Containerized always-on stack — container management, uptime monitoring and
+              alerting, service dashboard, relational database, queue broker and bookkeeping —
+              every container under an explicit memory limit and a pinned image tag. Hybrid
+              local + hosted inference routing. Infrastructure-as-config repository with ADR
+              practice and secret scanning on every push.
+            </p>
+          </div>
+        </div>
+
+        <div class="status-panel status-panel--amber">
+          <div class="status-header"><span class="status-pill">In progress</span></div>
+          <div class="status-body">
+            <p>
+              Metrics collection and time-series dashboards, deployed but not
+              yet configured. Host and GPU exporters. API spend dashboard widget.
+            </p>
+          </div>
+        </div>
+
+        <div class="status-panel status-panel--rose">
+          <div class="status-header"><span class="status-pill">Next</span></div>
+          <div class="status-body">
+            <p>
+              Raspberry Pi watchdog node, and with it the ADR-0001 migration of
+              uptime monitoring off the host it monitors. DNS filtering. Workflow
+              orchestration and document management. Single sign-on and tailnet ACLs. The
+              agent orchestration cluster described above.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="note-on-scope" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Note on scope</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">
+        This is the public view. The configuration itself, runbooks, network addressing,
+        port bindings and firewall rules live in a separate private repository.
+      </p>
+    </div>
   </section>
 
   <footer>
@@ -632,5 +1050,43 @@
   </footer>
 
 </main>
+
+<script>
+(function () {
+  "use strict";
+
+  var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Scroll reveal (IntersectionObserver only, no animation loop) ---------- */
+
+  (function scrollReveal() {
+    var sections = document.querySelectorAll(".reveal");
+
+    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+      sections.forEach(function (s) { s.classList.add("visible"); });
+      return;
+    }
+
+    sections.forEach(function (section) {
+      var children = section.querySelectorAll(".reveal-child");
+      children.forEach(function (child, i) {
+        child.style.transitionDelay = (Math.min(i, 6) * 55) + "ms";
+      });
+    });
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -60px 0px" });
+
+    sections.forEach(function (s) { observer.observe(s); });
+  })();
+})();
+</script>
+
 </body>
 </html>
