@@ -3,6 +3,11 @@
 # ============================================
 .env
 .env.*
+# Anything ending in .env — data.env, monitoring.env, and Portainer's
+# generated stack.env. The two patterns above do NOT cover these: they match
+# `.env` and `.env.something`, not `something.env`. Without this line a
+# stack.env dropped into the repo would be committed silently.
+*.env
 !.env.example
 *.key
 *.pem
