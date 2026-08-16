@@ -1,22 +1,20 @@
 <title>Homelab</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   :root {
-    --bg: #12141a;
-    --bg-elev: #1a1d25;
-    --text: #d9dce3;
-    --text-dim: #9aa0ac;
-    --border: #2a2e38;
-    --built-bg: #16302280;
-    --built-fg: #6fcf97;
-    --built-border: #2f5b41;
-    --progress-bg: #3a2f1580;
-    --progress-fg: #e0b565;
-    --progress-border: #5c4a26;
-    --planned-bg: #23252b80;
-    --planned-fg: #9aa0ac;
-    --planned-border: #383b44;
+    --bg: #0e1116;
+    --bg-raised: #151a22;
+    --border: #2a313d;
+    --text: #dde3ea;
+    --text-dim: #9aa5b3;
+    --text-faint: #6b7684;
+    --accent: #6fa8dc;
+    --code-bg: #1c2330;
+    --code-text: #cdd8e5;
+    --green: #7fbf7f;
+    --amber: #d9a441;
+    --grey: #9aa5b3;
+    --callout-border: #d9a441;
+    --callout-bg: #1e1a12;
   }
 
   * {
@@ -27,56 +25,111 @@
     margin: 0;
     padding: 0;
     background: var(--bg);
-    color: var(--text);
+    overflow-x: hidden;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
     line-height: 1.7;
+    font-size: 17px;
     -webkit-font-smoothing: antialiased;
   }
 
   main {
-    max-width: 820px;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 3.5rem 1.5rem 5rem;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  header {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2.5rem;
   }
 
   h1 {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 2.1rem;
+    font-weight: 700;
     letter-spacing: -0.01em;
     margin: 0 0 1.25rem;
-    color: #f0f1f4;
+    color: var(--text);
+  }
+
+  header p {
+    color: var(--text-dim);
+    margin: 0 0 1rem;
+    max-width: 66ch;
+  }
+
+  header p:last-child {
+    margin-bottom: 0;
+  }
+
+  section {
+    margin: 3.25rem 0;
   }
 
   h2 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 1.05rem;
     font-weight: 600;
-    margin: 3rem 0 1rem;
-    color: #f0f1f4;
+    margin: 2rem 0 1rem;
+    color: var(--text);
   }
 
   p {
     margin: 0 0 1.1rem;
     color: var(--text);
+    max-width: 68ch;
   }
 
-  hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 2.5rem 0;
+  p:last-child {
+    margin-bottom: 0;
   }
 
-  .intro {
-    font-size: 1.05rem;
-    color: var(--text-dim);
+  ul {
+    margin: 0 0 1.1rem;
+    padding-left: 1.3rem;
+  }
+
+  li {
+    margin-bottom: 0.85rem;
+    max-width: 66ch;
+  }
+
+  li:last-child {
+    margin-bottom: 0;
+  }
+
+  strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 0.12em 0.4em;
+    border-radius: 4px;
   }
 
   .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 6px;
     margin: 0 0 1.25rem;
   }
 
@@ -84,7 +137,7 @@
     border-collapse: collapse;
     width: 100%;
     min-width: 480px;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   th, td {
@@ -94,289 +147,441 @@
     white-space: nowrap;
   }
 
-  tbody tr:last-child th,
+  thead th {
+    background: var(--bg-raised);
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
   tbody tr:last-child td {
     border-bottom: none;
   }
 
-  thead th {
-    background: var(--bg-elev);
+  tbody th {
     color: var(--text-dim);
     font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    background: var(--bg-raised);
   }
 
-  .arch-table td, .arch-table th {
-    white-space: normal;
-    vertical-align: top;
-  }
-
-  .status-table td:first-child {
-    white-space: normal;
+  td, tbody th {
     color: var(--text);
   }
 
-  .status-table td:last-child {
-    white-space: normal;
+  .callout {
+    border: 1px solid var(--callout-border);
+    background: var(--callout-bg);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    padding: 0.2em 0.65em;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    border: 1px solid transparent;
-    white-space: nowrap;
+  .callout-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 0.6rem;
   }
 
-  .badge-built {
-    background: var(--built-bg);
-    color: var(--built-fg);
-    border-color: var(--built-border);
+  .callout p {
+    margin-bottom: 0;
+    color: var(--text);
   }
 
-  .badge-progress {
-    background: var(--progress-bg);
-    color: var(--progress-fg);
-    border-color: var(--progress-border);
+  .callout p strong {
+    color: var(--amber);
   }
 
-  .badge-planned {
-    background: var(--planned-bg);
-    color: var(--planned-fg);
-    border-color: var(--planned-border);
+  .status-item {
+    margin-bottom: 1.5rem;
   }
 
-  .status-note {
-    display: block;
-    margin-top: 0.3rem;
-    color: var(--text-dim);
-    font-size: 0.85rem;
+  .status-item:last-child {
+    margin-bottom: 0;
   }
 
-  .adr {
-    background: var(--bg-elev);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.25rem 1.4rem;
-    margin: 0 0 1.25rem;
+  .status-label {
+    font-weight: 700;
   }
 
-  .adr p {
+  .status-label.running {
+    color: var(--green);
+  }
+
+  .status-label.progress {
+    color: var(--amber);
+  }
+
+  .status-label.next {
+    color: var(--grey);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
     margin: 0;
   }
 
-  .adr strong {
-    color: #f0f1f4;
-  }
-
   footer {
-    margin-top: 3rem;
-    color: var(--text-dim);
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
     font-size: 0.9rem;
   }
 
+  footer p {
+    color: var(--text-faint);
+    margin: 0;
+  }
+
   @media (max-width: 480px) {
+    body {
+      font-size: 16px;
+    }
     main {
-      padding: 2.25rem 1.1rem 3.5rem;
+      padding: 2.5rem 1.1rem 4rem;
     }
-
     h1 {
-      font-size: 1.6rem;
-    }
-
-    th, td {
-      padding: 0.6rem 0.75rem;
-      font-size: 0.88rem;
+      font-size: 1.7rem;
     }
   }
 </style>
 
 <main>
-  <h1>Homelab</h1>
-  <p class="intro">
-    A three-node homelab built around a deliberate split of responsibilities: an
-    always-on Dell OptiPlex 7050 Micro running stateful services, a Windows gaming
-    desktop (Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU capacity, and a Raspberry Pi acting as an independent
-    watchdog. All inter-node traffic runs over Tailscale. The interesting part is
-    not the hardware &mdash; it is the constraint that each node is chosen for what it is
-    actually good at, and that the monitoring is designed around the assumption
-    that any given node will fail.
-  </p>
-
-  <hr>
-
-  <h2>Architecture</h2>
-  <div class="table-wrap">
-    <table class="arch-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Pi (Node C)</th>
-          <th>OptiPlex (Node B)</th>
-          <th>Desktop (Node A)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Defining trait</th>
-          <td>~5W, never off</td>
-          <td>i7, 16GB, always on</td>
-          <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
-        </tr>
-        <tr>
-          <th>Failure mode</th>
-          <td>SD card death</td>
-          <td>OOM, disk fill</td>
-          <td>You start a game</td>
-        </tr>
-        <tr>
-          <th>Good at</th>
-          <td>Watchdog, DNS</td>
-          <td>Stateful services</td>
-          <td>Burst compute</td>
-        </tr>
-        <tr>
-          <th>Bad at</th>
-          <td>Anything heavy</td>
-          <td>Sustained CPU/GPU</td>
-          <td>Being available</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p>
-    The desktop being unreliable is a design input, not a defect. It is expected to
-    disappear whenever it gets used for gaming, so nothing stateful lives there and
-    nothing alerts on its absence.
-  </p>
-
-  <hr>
-
-  <h2>Selected decisions</h2>
-  <p>
-    Architecture Decision Records are kept with the configuration. They will be
-    published here as they are cleared for public release.
-  </p>
-  <div class="adr">
+  <header>
+    <h1>Homelab</h1>
     <p>
-      <strong>ADR-0001 &mdash; Uptime Kuma runs on the Pi, not the OptiPlex.</strong> Uptime Kuma was
-      originally installed on the OptiPlex simply because that is where everything
-      else already lived, which made the OptiPlex a single point of failure for
-      knowing whether the OptiPlex was up. Alerting that shares a failure domain with
-      the thing it watches goes silent at exactly the moment it is needed &mdash; the
-      outage takes down the notification path along with everything else. Moving Kuma
-      to a separate ~5W node with its own power draw, storage and failure modes turns
-      a silent outage into an alert.
+      A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
+      7050 Micro hosting the stateful container stack, a Windows gaming desktop
+      (Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU capacity, and a
+      Raspberry Pi as an independent watchdog. All inter-node traffic runs over
+      Tailscale; nothing is exposed to the LAN or the public internet.
     </p>
-  </div>
+    <p>
+      The point of the project is not the hardware. It is that every node is assigned
+      work it is actually suited to, every container is capacity-bounded, and the
+      monitoring is designed around the assumption that any given node will fail —
+      including the node doing the monitoring.
+    </p>
+  </header>
 
-  <hr>
+  <section id="architecture">
+    <h2>Architecture</h2>
 
-  <h2>Status</h2>
-  <p>Honest accounting of what is actually running today.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Pi (Node C)</th>
+            <th>OptiPlex (Node B)</th>
+            <th>Desktop (Node A)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Defining trait</th>
+            <td>~5W, never off</td>
+            <td>i7, 16GB, always on</td>
+            <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
+          </tr>
+          <tr>
+            <th scope="row">Failure mode</th>
+            <td>SD card death</td>
+            <td>OOM, disk fill</td>
+            <td>You start a game</td>
+          </tr>
+          <tr>
+            <th scope="row">Good at</th>
+            <td>Watchdog, DNS</td>
+            <td>Stateful services</td>
+            <td>Burst compute</td>
+          </tr>
+          <tr>
+            <th scope="row">Bad at</th>
+            <td>Anything heavy</td>
+            <td>Sustained CPU/GPU</td>
+            <td>Being available</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <div class="table-wrap">
-    <table class="status-table">
-      <tbody>
-        <tr>
-          <td>Three-node hardware plan and role split</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>OptiPlex node &mdash; board fix and RAM upgrade</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Tailscale mesh across the two active nodes</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Containerized always-on service stack</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Uptime monitoring and alerting</td>
-          <td><span class="badge badge-built">Built</span><span class="status-note">&mdash; running on the always-on node</span></td>
-        </tr>
-        <tr>
-          <td>Service dashboard / command center</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Stateful data layer and job queue</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Hybrid local + hosted LLM inference routing</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Infrastructure-as-config repo and ADR practice</td>
-          <td><span class="badge badge-built">Built</span></td>
-        </tr>
-        <tr>
-          <td>Metrics collection and time-series dashboards</td>
-          <td><span class="badge badge-progress">In progress</span><span class="status-note">&mdash; deployed, not yet configured</span></td>
-        </tr>
-        <tr>
-          <td>Host and GPU metrics exporters</td>
-          <td><span class="badge badge-progress">In progress</span></td>
-        </tr>
-        <tr>
-          <td>API spend dashboard widget</td>
-          <td><span class="badge badge-progress">In progress</span></td>
-        </tr>
-        <tr>
-          <td>Raspberry Pi node</td>
-          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; hardware not yet deployed</span></td>
-        </tr>
-        <tr>
-          <td>Relocating uptime monitoring to the Pi (ADR-0001)</td>
-          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; depends on the Pi</span></td>
-        </tr>
-        <tr>
-          <td>Pi-hole and DNS</td>
-          <td><span class="badge badge-planned">Planned</span></td>
-        </tr>
-        <tr>
-          <td>Workflow orchestration and document management</td>
-          <td><span class="badge badge-planned">Planned</span></td>
-        </tr>
-        <tr>
-          <td>Single sign-on</td>
-          <td><span class="badge badge-planned">Planned</span></td>
-        </tr>
-        <tr>
-          <td>Rack enclosure and environmental sensors</td>
-          <td><span class="badge badge-planned">Planned</span></td>
-        </tr>
-        <tr>
-          <td>Dedicated local AI node</td>
-          <td><span class="badge badge-planned">Planned</span><span class="status-note">&mdash; deferred, possibly indefinitely</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <h3>Why the work is split this way</h3>
 
-  <p>
-    Nothing above is marked Built unless it is running now. Items with written
-    configuration but no deployment are marked In progress, not Built.
-  </p>
+    <p>
+      <strong>The desktop is unreliable by design.</strong> It is a gaming machine first, so it
+      disappears without warning. That is treated as an input, not a defect: nothing
+      stateful is placed on it, it owns no queue, and no alert fires when it vanishes.
+      Alerting on a node that is <em>expected</em> to go offline just trains alert-blindness.
+      What it is genuinely good at is burst GPU work, so that is all it gets —
+      inference and headless browser workers, both of which can fail and be retried.
+    </p>
+    <p>
+      <strong>The OptiPlex holds anything that must survive a reboot.</strong> Databases, the queue
+      broker, dashboards, bookkeeping. It is the only node with a real availability
+      guarantee, so it is the only node trusted with state.
+    </p>
+    <p>
+      <strong>Headless browser work runs on the desktop, orchestrated from the OptiPlex.</strong>
+      Each Chromium worker costs 300–500MB. Running a scraping pipeline on a 16GB box
+      alongside the databases would flatten it. Splitting orchestration from execution
+      means the small always-on node keeps the queue and the state, while the big
+      unreliable node does the expensive, interruptible part.
+    </p>
+    <p>
+      <strong>The Pi exists to watch the others.</strong> ~5W, separate power draw, separate
+      storage, separate failure modes — see ADR-0001.
+    </p>
+  </section>
 
-  <hr>
+  <section id="what-is-running">
+    <h2>What is running</h2>
+    <p>Containerized on the always-on node, managed through Portainer:</p>
 
-  <h2>Note on scope</h2>
-  <p>
-    This is the public view. Configuration, runbooks, network addressing and the
-    full service inventory live in a separate private repository.
-  </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Component</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Container management</td>
+            <td>Portainer</td>
+          </tr>
+          <tr>
+            <td>Uptime monitoring and alerting</td>
+            <td>Uptime Kuma</td>
+          </tr>
+          <tr>
+            <td>Service dashboard</td>
+            <td>Homepage</td>
+          </tr>
+          <tr>
+            <td>Relational database</td>
+            <td>PostgreSQL, with pgAdmin</td>
+          </tr>
+          <tr>
+            <td>Queue broker</td>
+            <td>Redis</td>
+          </tr>
+          <tr>
+            <td>Double-entry bookkeeping</td>
+            <td>Manager.io</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <footer>Homelab</footer>
+    <p>
+      Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
+      the host/GPU exporters) are deployed but not yet configured — see Status.
+    </p>
+  </section>
+
+  <section id="operational-practice">
+    <h2>Operational practice</h2>
+    <p>Conventions applied across every compose file in the private config repo:</p>
+    <ul>
+      <li>
+        <strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
+        is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
+        sized deliberately so it fits alongside the services it observes.
+      </li>
+      <li>
+        <strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
+        reproduces the same stack rather than silently pulling a new major version.
+      </li>
+      <li>
+        <strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
+        state deliberately is not. The repo plus a Tailscale login is the rebuild path.
+      </li>
+      <li>
+        <strong>Nothing binds to <code>0.0.0.0</code>.</strong> Services bind to the Tailscale interface only,
+        so nothing is reachable from the local network, let alone the internet.
+      </li>
+      <li>
+        <strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
+        what makes a service portable between nodes: moving it becomes a volume copy
+        rather than a config rewrite. The one exception is Docker port bindings, which
+        require a literal address at bind time.
+      </li>
+      <li>
+        <strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+        documents every variable with placeholder values, and <code>gitleaks</code> runs against
+        staged changes before every push.
+      </li>
+    </ul>
+  </section>
+
+  <section id="network-security-model">
+    <h2>Network security model</h2>
+    <p>
+      The design goal is that nothing is reachable without authenticating first, and
+      that being on the same physical network grants nothing at all.
+    </p>
+    <ul>
+      <li>
+        <strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
+        carries all inter-node traffic. There is no port forwarding on the router, no
+        reverse proxy exposed to the internet, and no public ingress of any kind.
+      </li>
+      <li>
+        <strong>Access is authenticated per device, not per network.</strong> A machine reaches
+        services because it has authenticated onto the tailnet — not because it
+        happens to sit on the right LAN. Revoking a device removes its access
+        everywhere at once, rather than requiring a firewall change.
+      </li>
+      <li>
+        <strong>Services bind to the Tailscale interface only, never <code>0.0.0.0</code>.</strong> A service
+        is not reachable from the local network even from a machine plugged into the
+        same switch. This is enforced in the compose files themselves rather than
+        relying on a perimeter firewall to catch mistakes.
+      </li>
+      <li>
+        <strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
+        publishes, so an exporter cannot be scraped from anywhere else.
+      </li>
+      <li>
+        <strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
+        documents every required variable with placeholder values, and <code>gitleaks</code> is
+        run against staged changes before every push.
+      </li>
+    </ul>
+    <p>
+      Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
+      restricting which node may reach which service, and network isolation for agent
+      runtimes so a runtime cannot reach the rest of the stack.
+    </p>
+  </section>
+
+  <section id="architecture-decisions">
+    <h2>Architecture decisions</h2>
+    <p>
+      Decisions are recorded as ADRs at the time they are made, rather than
+      reconstructed afterwards. The configs show <em>what</em> runs; the ADRs record <em>why</em>.
+    </p>
+    <p>
+      <strong>ADR-0001 — monitoring moved off the box it monitors.</strong> Uptime Kuma was
+      originally installed on the OptiPlex, simply because that is where everything
+      else already lived. That made the OptiPlex a single point of failure for knowing
+      whether the OptiPlex was up: if it OOMs, fills its disk, or reboots for updates,
+      monitoring stops at the same instant the thing being monitored stops — and the
+      failure is silent, because the alerting is part of the outage. Alerting must not
+      share a failure domain with the thing it watches. Uptime Kuma therefore moves to
+      the Pi: an independent observer with its own power, storage and failure modes.
+    </p>
+    <p>
+      Prometheus, Grafana and Homepage deliberately stay on the OptiPlex. They serve a
+      different purpose — diagnosis after the fact, not notification in the moment.
+      Only the second needs to survive the outage. A dashboard being unreachable
+      during an outage is accepted: during an outage there is nothing to look at.
+    </p>
+    <p>
+      <strong>Alerting deliberately excludes the desktop.</strong> Alerting on a node expected to
+      disappear produces noise, and noise produces ignored alerts.
+    </p>
+    <p>
+      <strong>A dedicated local AI node is deferred, with a defined trigger.</strong> The hybrid
+      local + hosted inference routing already covers the work the 2070 Super cannot.
+      A dedicated GPU build is deferred until a specific spend threshold is crossed,
+      rather than bought speculatively — the discipline being that hardware must fix a
+      fault that exists now, or remove a ceiling actually being hit.
+    </p>
+  </section>
+
+  <section id="migrations">
+    <h2>Migrations</h2>
+    <ul>
+      <li>
+        <strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
+        Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
+        is useful practice, and because every monitor targets a MagicDNS name rather
+        than an IP, the second pass is a volume copy rather than a rewrite.
+      </li>
+      <li>
+        <strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
+        lifted a ceiling that was actually being hit, which is what justified it.
+      </li>
+      <li>
+        <strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
+        values the dashboard displays, because the dashboard widget passes PromQL in a
+        URL query string and long expressions become an encoding problem. Collapsing
+        each to a single short metric name keeps the dashboard config readable.
+      </li>
+    </ul>
+  </section>
+
+  <section id="planned-agent-orchestration">
+    <h2>Planned — agent orchestration</h2>
+    <div class="callout">
+      <span class="callout-label">Not yet built</span>
+      <p><strong>Nothing in this section is running today.</strong> It is the next phase of the build,
+      recorded here as direction rather than achievement.</p>
+    </div>
+    <p>
+      The intent is a managed cluster of AI agents handling day-to-day operational
+      work — monitoring triage, routine maintenance, bookkeeping and document intake —
+      orchestrated from the always-on node, with GPU-heavy steps dispatched to the
+      desktop and hosted models used where local capacity falls short.
+    </p>
+    <p>
+      The placement logic is the same as everywhere else in this homelab: orchestration
+      and state on the reliable node, expensive interruptible compute on the unreliable
+      one. Agent runtimes are intended to be network-isolated from the rest of the
+      stack, so that a compromised or misbehaving runtime cannot reach the databases or
+      the queue broker.
+    </p>
+  </section>
+
+  <section id="build-status">
+    <h2>Build status</h2>
+    <p>
+      Built in public. This is a live project, so the page separates what runs today
+      from what is next — nothing below is listed as running unless it is.
+    </p>
+
+    <div class="status-item">
+      <p><span class="status-label running">Running now.</span> Three-node role split with workloads placed by node
+      reliability. Tailscale-only mesh with no public ingress and no LAN exposure.
+      Containerized always-on stack — container management, uptime monitoring and
+      alerting, service dashboard, relational database, queue broker and bookkeeping —
+      every container under an explicit memory limit and a pinned image tag. Hybrid
+      local + hosted inference routing. Infrastructure-as-config repository with ADR
+      practice and secret scanning on every push.</p>
+    </div>
+
+    <div class="status-item">
+      <p><span class="status-label progress">In progress.</span> Metrics collection and time-series dashboards, deployed but not
+      yet configured. Host and GPU exporters. API spend dashboard widget.</p>
+    </div>
+
+    <div class="status-item">
+      <p><span class="status-label next">Next.</span> Raspberry Pi watchdog node, and with it the ADR-0001 migration of
+      uptime monitoring off the host it monitors. DNS filtering. Workflow
+      orchestration and document management. Single sign-on and tailnet ACLs. The
+      agent orchestration cluster described above.</p>
+    </div>
+  </section>
+
+  <section id="note-on-scope">
+    <h2>Note on scope</h2>
+    <p>
+      This is the public view. The configuration itself, runbooks, network addressing,
+      port bindings and firewall rules live in a separate private repository.
+    </p>
+  </section>
+
+  <footer>
+    <p>Homelab — infrastructure-as-config.</p>
+  </footer>
 </main>
