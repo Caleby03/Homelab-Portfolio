@@ -307,7 +307,35 @@
     border-radius: 50%;
     background: var(--border-strong);
     flex: none;
+    /* Slow pulse, like a status LED on a live box. Deliberately unhurried and
+       low-contrast — a fast blink reads as an alarm rather than a heartbeat.
+       Each panel is offset below so they breathe independently instead of
+       flashing in lockstep, which looks mechanical. */
+    animation: led-pulse 3.4s ease-in-out infinite;
   }
+
+  @keyframes led-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.42; }
+  }
+
+  /* Stagger so the board looks alive rather than synchronised. */
+  #architecture .panel-led            { animation-delay: 0s; }
+  #what-is-running .panel-led         { animation-delay: -0.5s; }
+  #operational-practice .panel-led    { animation-delay: -1.1s; }
+  #network-security-model .panel-led  { animation-delay: -1.7s; }
+  #architecture-decisions .panel-led  { animation-delay: -2.2s; }
+  #migrations .panel-led              { animation-delay: -0.8s; }
+  #planned-agent-orchestration .panel-led { animation-delay: -2.9s; }
+  #build-status .panel-led            { animation-delay: -1.4s; }
+  #note-on-scope .panel-led           { animation-delay: -2.6s; }
+
+  /* Header dot and the featured panel's LED pulse too. */
+  .status-strip .dot,
+  .feature-panel .feature-header .led {
+    animation: led-pulse 3.4s ease-in-out infinite;
+  }
+  .feature-panel .feature-header .led { animation-delay: -1.9s; }
 
   .panel--green .panel-led { background: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-bg); }
   .panel--rose .panel-led  { background: var(--rose);  box-shadow: 0 0 0 3px var(--rose-bg); }
@@ -631,6 +659,16 @@
     .entrance {
       opacity: 1 !important;
       transform: none !important;
+    }
+
+    /* The global rule above collapses animation duration, which would freeze
+       the LEDs at whatever opacity the single iteration lands on. Pin them
+       fully lit instead. */
+    .panel-led,
+    .status-strip .dot,
+    .feature-panel .feature-header .led {
+      animation: none !important;
+      opacity: 1 !important;
     }
 
     .reveal,
