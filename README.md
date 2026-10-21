@@ -1,11 +1,10 @@
 # Homelab
 
-A four-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
+A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
 7050 Micro holding every piece of state, a Raspberry Pi as the independent
-alerting node and front door, a dual-GPU Threadripper serving a local 35B model
-and a contained AI agent, and a Windows gaming desktop that is allowed to
-vanish. All inter-node traffic runs over Tailscale; nothing is exposed to the
-LAN or the public internet.
+alerting node and front door, and a dual-GPU Threadripper serving a local 35B
+model and a contained AI agent. All inter-node traffic runs over Tailscale;
+nothing is exposed to the LAN or the public internet.
 
 The point of the project is not the hardware. It is that every node is assigned
 work it is actually suited to, every container is capacity-bounded, nothing that
@@ -17,12 +16,12 @@ node doing the monitoring.
 
 ## Architecture
 
-|  | sentinel — Pi | forge — OptiPlex | synapse — Threadripper | desktop |
-|---|---|---|---|---|
-| **Hardware** | Raspberry Pi, microSD | i7-7700T (35W), 16GB, NVMe | 9960X, 2× RTX 5070 Ti 16GB, 32GB | 3700X, RTX 2070S, 64GB, Win 11 |
-| **Job** | Alerting, front door | All state, metrics | Inference, agent | Gaming |
-| **Failure mode** | SD card death | OOM, disk fill | GPUs on another job | You start a game |
-| **Trusted with** | Saying something is wrong | Anything that must survive a reboot | Work that can be skipped | Nothing |
+|  | sentinel — Pi | forge — OptiPlex | synapse — Threadripper |
+|---|---|---|---|
+| **Hardware** | Raspberry Pi, microSD | i7-7700T (35W), 16GB, NVMe | 9960X, 2× RTX 5070 Ti 16GB, 32GB |
+| **Job** | Alerting, front door | All state, metrics | Inference, agent |
+| **Failure mode** | SD card death | OOM, disk fill | GPUs on another job |
+| **Trusted with** | Saying something is wrong | Anything that must survive a reboot | Work that can be skipped |
 
 ### Why the work is split this way
 
@@ -41,10 +40,6 @@ agent's model and enriches other pipelines, but it is treated as optional: it
 gets torn down for benchmarking, and its GPUs get lent to other projects. Every
 consumer is built so that synapse being down costs a feature, never an alert.
 
-**The desktop is unreliable by design, and has been written out of the critical
-path.** It used to be the burst-inference host; that job moved to synapse,
-which is always-on by design. It still reports metrics and deliberately never
-alerts — alerting on a node *expected* to go offline trains alert-blindness.
 
 ---
 
@@ -63,7 +58,6 @@ alerts — alerting on a node *expected* to go offline trains alert-blindness.
 | synapse | AI agent (Discord) | Hermes Agent |
 | synapse | Agent egress allowlist, search | Squid, SearXNG |
 | forge, synapse | Read-only Docker API for the dashboard | docker-socket-proxy |
-| desktop | Host and GPU metrics | windows_exporter, GPU exporter |
 
 Each node runs its own Portainer; services address each other by Tailscale name.
 
@@ -266,8 +260,8 @@ when they stop being true.
   container rebuilds it. Fixed with a boot-time healer that recreates only
   containers whose bindings are configured but not live — a no-op on a clean
   boot.
-- **Built the GPU node and moved inference onto it**, dissolving the "agent
-  fallback when the desktop is offline" problem.
+- **Built the GPU node and moved inference onto it** — the agent's model now
+  runs locally, with hosted APIs out of the steady state.
 - **Agent runtime, three reversals**, ending at one local agent on synapse; the
   removed runtime's config was deleted rather than left behind.
 - **Uptime Kuma and Homepage → Pi**, per ADR-0001 — a volume copy, not a rewrite.
@@ -282,7 +276,7 @@ when they stop being true.
 
 ## Build status
 
-**Running now.** Four-node split with workloads placed by node reliability.
+**Running now.** Three-node split with workloads placed by node reliability.
 Tailscale-only mesh enforced in the firewall. Independent alerting and dashboard
 on the Pi. Stateful stack, metrics and bookkeeping on forge with boot-time port
 self-repair. Local 35B inference and a network-contained agent on synapse. Blink

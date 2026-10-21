@@ -421,7 +421,7 @@
   #architecture:hover { border-color: var(--cyan-border); box-shadow: 0 14px 32px -20px rgba(79, 180, 199, 0.32); }
   #architecture table thead th { border-bottom-color: var(--cyan-border); color: var(--cyan-label); }
   #architecture tbody tr:hover { background: var(--cyan-bg); }
-  /* Five columns of prose: wrap rather than scroll at desktop width. */
+  /* Four columns of prose: wrap rather than scroll on wide screens. */
   #architecture td, #architecture th { white-space: normal; }
   #architecture table { min-width: 620px; }
 
@@ -833,11 +833,10 @@
     <div class="status-strip entrance"><span class="dot" aria-hidden="true"></span></div>
     <h1 class="entrance">Homelab</h1>
     <p class="entrance">
-      A four-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
+      A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
       7050 Micro holding every piece of state, a Raspberry Pi as the independent
-      alerting node and front door, a dual-GPU Threadripper serving a local 35B model
-      and a contained AI agent, and a Windows gaming desktop that is allowed to vanish.
-      All inter-node traffic runs over Tailscale; nothing is exposed to the LAN or the
+      alerting node and front door, and a dual-GPU Threadripper serving a local 35B
+      model and a contained AI agent. All inter-node traffic runs over Tailscale; nothing is exposed to the LAN or the
       public internet.
     </p>
     <p class="entrance">
@@ -860,7 +859,6 @@
               <th>sentinel — Pi</th>
               <th>forge — OptiPlex</th>
               <th>synapse — Threadripper</th>
-              <th>desktop</th>
             </tr>
           </thead>
           <tbody>
@@ -869,28 +867,24 @@
               <td>Raspberry Pi, microSD</td>
               <td>i7-7700T (35W), 16GB, NVMe</td>
               <td>9960X, 2× RTX 5070 Ti 16GB, 32GB</td>
-              <td>3700X, RTX 2070S, 64GB, Win 11</td>
             </tr>
             <tr>
               <td><strong>Job</strong></td>
               <td>Alerting, front door</td>
               <td>All state, metrics</td>
               <td>Inference, agent</td>
-              <td>Gaming</td>
             </tr>
             <tr>
               <td><strong>Failure mode</strong></td>
               <td>SD card death</td>
               <td>OOM, disk fill</td>
               <td>GPUs on another job</td>
-              <td>You start a game</td>
             </tr>
             <tr>
               <td><strong>Trusted with</strong></td>
               <td>Saying something is wrong</td>
               <td>Anything that must survive a reboot</td>
               <td>Work that can be skipped</td>
-              <td>Nothing</td>
             </tr>
           </tbody>
         </table>
@@ -914,13 +908,6 @@
         agent's model and enriches other pipelines, but it is treated as optional: it gets
         torn down for benchmarking, and its GPUs get lent to other projects. Every
         consumer is built so that synapse being down costs a feature, never an alert.
-      </p>
-      <p class="reveal-child">
-        <strong>The desktop is unreliable by design, and has been written out of the critical path.</strong>
-        It is a gaming machine first and disappears without warning. It used to be the
-        burst-inference host; that job moved to synapse, which is always-on by design. It
-        still reports metrics, deliberately never alerts — alerting on a node that is
-        <em>expected</em> to go offline just trains alert-blindness.
       </p>
     </div>
   </section>
@@ -950,7 +937,6 @@
             <tr><td>synapse</td><td>AI agent (Discord)</td><td>Hermes Agent</td></tr>
             <tr><td>synapse</td><td>Agent egress allowlist, search</td><td>Squid, SearXNG</td></tr>
             <tr><td>forge, synapse</td><td>Read-only Docker API for the dashboard</td><td>docker-socket-proxy</td></tr>
-            <tr><td>desktop</td><td>Host and GPU metrics</td><td>windows_exporter, GPU exporter</td></tr>
           </tbody>
         </table>
       </div>
@@ -1323,8 +1309,8 @@
           container started by hand, with no compose metadata, could not be recreated at all —
           so it became a compose stack too.</li>
         <li class="reveal-child"><strong>Built the GPU node and moved inference onto it.</strong> A dual-GPU Threadripper
-          replaced the gaming desktop as the inference host, which dissolved the "what does
-          the agent do when the desktop goes offline" problem rather than answering it.</li>
+          now serves the agent's model locally, on a node that is always on by design, with
+          hosted APIs no longer part of the steady state.</li>
         <li class="reveal-child"><strong>Agent runtime, three reversals.</strong> One runtime chosen, reversed for another,
           split into two by trust zone, and finally collapsed to one local agent on synapse.
           The removed runtime's config was deleted from the repo rather than left as files for
@@ -1360,7 +1346,7 @@
           <div class="status-header"><span class="status-pill">Running now</span></div>
           <div class="status-body">
             <p>
-              Four-node split with workloads placed by node reliability. Tailscale-only mesh
+              Three-node split with workloads placed by node reliability. Tailscale-only mesh
               enforced in the firewall (ADR-0002). Independent alerting and dashboard on the
               Pi. Stateful stack, metrics and bookkeeping on forge, every container under a
               memory limit, with boot-time port self-repair. Local 35B inference and a
