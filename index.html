@@ -23,7 +23,7 @@
     /* ---------- Status semantics — meaning is fixed, do not remap roles ----------
        GREEN = built / running now · AMBER = in progress · ROSE = planned / not yet built.
        Used by: header status dot, the featured Docker firewall-bypass panel, the three
-       Build-status cards, and the Planned-orchestration callout. Saturation may be
+       Build-status cards, the inline stage pills, and the Local-AI "next phase" callout. Saturation may be
        enriched, but these three hues must never represent anything else on the page. */
     --green: #5fcf8f;
     --green-bg: rgba(95, 207, 143, 0.09);
@@ -91,6 +91,19 @@
     --copper-border: rgba(209, 147, 95, 0.44);
     --copper-bg: rgba(209, 147, 95, 0.09);
     --copper-label: #ecbc90;
+
+    /* Added for the two project panels (local AI, Blink). Magenta sits between the
+       semantic rose and the decisions violet without reading as either; lime is
+       the only yellow-green on the page, so the Blink panel stands on its own. */
+    --magenta: #cf6fc4;
+    --magenta-border: rgba(207, 111, 196, 0.45);
+    --magenta-bg: rgba(207, 111, 196, 0.09);
+    --magenta-label: #eeaee6;
+
+    --lime: #a6c85c;
+    --lime-border: rgba(166, 200, 92, 0.45);
+    --lime-bg: rgba(166, 200, 92, 0.09);
+    --lime-label: #cfe59a;
 
     --code-bg: #1a1e26;
     --code-text: #c9beea;
@@ -326,7 +339,8 @@
   #network-security-model .panel-led  { animation-delay: -1.7s; }
   #architecture-decisions .panel-led  { animation-delay: -2.2s; }
   #migrations .panel-led              { animation-delay: -0.8s; }
-  #planned-agent-orchestration .panel-led { animation-delay: -2.9s; }
+  #local-ai .panel-led                { animation-delay: -2.9s; }
+  #blink-watch .panel-led             { animation-delay: -0.3s; }
   #build-status .panel-led            { animation-delay: -1.4s; }
   #note-on-scope .panel-led           { animation-delay: -2.6s; }
 
@@ -407,6 +421,9 @@
   #architecture:hover { border-color: var(--cyan-border); box-shadow: 0 14px 32px -20px rgba(79, 180, 199, 0.32); }
   #architecture table thead th { border-bottom-color: var(--cyan-border); color: var(--cyan-label); }
   #architecture tbody tr:hover { background: var(--cyan-bg); }
+  /* Five columns of prose: wrap rather than scroll at desktop width. */
+  #architecture td, #architecture th { white-space: normal; }
+  #architecture table { min-width: 620px; }
 
   #operational-practice { border-top-color: var(--teal-border); }
   #operational-practice .panel-header { border-bottom-color: var(--teal-border); }
@@ -452,6 +469,122 @@
   #note-on-scope .panel-header h2 { color: var(--copper-label); }
   #note-on-scope .panel-led { background: var(--copper); box-shadow: 0 0 0 3px var(--copper-bg); }
   #note-on-scope:hover { border-color: var(--copper-border); box-shadow: 0 14px 32px -20px rgba(209, 147, 95, 0.3); }
+
+  #local-ai { border-top-color: var(--magenta-border); }
+  #local-ai .panel-header { border-bottom-color: var(--magenta-border); }
+  #local-ai .panel-header h2 { color: var(--magenta-label); }
+  #local-ai .panel-led { background: var(--magenta); box-shadow: 0 0 0 3px var(--magenta-bg); }
+  #local-ai:hover { border-color: var(--magenta-border); box-shadow: 0 14px 32px -20px rgba(207, 111, 196, 0.32); }
+  #local-ai li:hover { background: var(--magenta-bg); }
+  #local-ai code { background: rgba(207, 111, 196, 0.14); color: var(--magenta-label); }
+  #local-ai table thead th { border-bottom-color: var(--magenta-border); color: var(--magenta-label); }
+  #local-ai tbody tr:hover { background: var(--magenta-bg); }
+
+  #blink-watch { border-top-color: var(--lime-border); }
+  #blink-watch .panel-header { border-bottom-color: var(--lime-border); }
+  #blink-watch .panel-header h2 { color: var(--lime-label); }
+  #blink-watch .panel-led { background: var(--lime); box-shadow: 0 0 0 3px var(--lime-bg); }
+  #blink-watch:hover { border-color: var(--lime-border); box-shadow: 0 14px 32px -20px rgba(166, 200, 92, 0.32); }
+  #blink-watch li:hover { background: var(--lime-bg); }
+  #blink-watch code { background: rgba(166, 200, 92, 0.14); color: var(--lime-label); }
+  #blink-watch table thead th { border-bottom-color: var(--lime-border); color: var(--lime-label); }
+  #blink-watch tbody tr:hover { background: var(--lime-bg); }
+
+  /* ---------- Pipeline (Blink) ---------- */
+
+  ol.pipeline {
+    list-style: none;
+    counter-reset: step;
+    margin: 0 0 16px;
+    padding: 0;
+    color: var(--text-dim);
+  }
+
+  ol.pipeline li {
+    counter-increment: step;
+    position: relative;
+    margin: 0 0 10px;
+    padding: 10px 14px 10px 46px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--lime-border);
+    background: var(--panel-bg-nested);
+    border-radius: 0;
+  }
+
+  ol.pipeline li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 10px;
+    font-family: var(--mono);
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--lime-label);
+  }
+
+  /* Inline state pills inside tables. Same semantic hues as Build status. */
+  .pill {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1px 7px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .pill--green { color: var(--green); background: var(--green-pill-bg); border-color: var(--green-border); }
+  .pill--amber { color: var(--amber); background: var(--amber-pill-bg); border-color: var(--amber-border); }
+  .pill--rose  { color: var(--rose);  background: var(--rose-pill-bg);  border-color: var(--rose-border); }
+
+  td.wrap { white-space: normal; min-width: 220px; }
+
+  /* ---------- Screenshot strip (Blink progression) ---------- */
+
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 0 0 10px;
+    align-items: start;
+  }
+
+  .shots figure {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--lime-border);
+    background: var(--panel-bg-nested);
+  }
+
+  /* The last frame is the result, so it gets the stronger rail. */
+  .shots figure:last-child { border-color: var(--lime-border); border-top-color: var(--lime); }
+
+  .shots img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #1a1a1e;
+  }
+
+  .shots figcaption {
+    padding: 9px 11px 11px;
+    font-size: 0.84em;
+    line-height: 1.45;
+    color: var(--text-dim);
+  }
+
+  .shots .shot-step {
+    display: block;
+    margin-bottom: 3px;
+    font-family: var(--mono);
+    font-size: 0.82em;
+    letter-spacing: 0.04em;
+    color: var(--lime-label);
+  }
+
+  .shots-note {
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
 
   /* ---------- Callout ---------- */
 
@@ -700,17 +833,19 @@
     <div class="status-strip entrance"><span class="dot" aria-hidden="true"></span></div>
     <h1 class="entrance">Homelab</h1>
     <p class="entrance">
-      A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
-      7050 Micro hosting the stateful container stack, a Windows gaming desktop
-      (Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU capacity, and a
-      Raspberry Pi as an independent watchdog. All inter-node traffic runs over
-      Tailscale; nothing is exposed to the LAN or the public internet.
+      A four-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
+      7050 Micro holding every piece of state, a Raspberry Pi as the independent
+      alerting node and front door, a dual-GPU Threadripper serving a local 35B model
+      and a contained AI agent, and a Windows gaming desktop that is allowed to vanish.
+      All inter-node traffic runs over Tailscale; nothing is exposed to the LAN or the
+      public internet.
     </p>
     <p class="entrance">
       The point of the project is not the hardware. It is that every node is assigned
-      work it is actually suited to, every container is capacity-bounded, and the
-      monitoring is designed around the assumption that any given node will fail —
-      including the node doing the monitoring.
+      work it is actually suited to, every container is capacity-bounded, nothing that
+      matters depends on the least reliable thing it touches, and the monitoring is
+      designed around the assumption that any given node will fail — including the
+      node doing the monitoring.
     </p>
   </header>
 
@@ -722,35 +857,40 @@
           <thead>
             <tr>
               <th></th>
-              <th>Pi (Node C)</th>
-              <th>OptiPlex (Node B)</th>
-              <th>Desktop (Node A)</th>
+              <th>sentinel — Pi</th>
+              <th>forge — OptiPlex</th>
+              <th>synapse — Threadripper</th>
+              <th>desktop</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Defining trait</strong></td>
-              <td>~5W, never off</td>
-              <td>i7, 16GB, always on</td>
-              <td>8GB VRAM, 64GB RAM, <strong>unreliable</strong></td>
+              <td><strong>Hardware</strong></td>
+              <td>Raspberry Pi, microSD</td>
+              <td>i7-7700T (35W), 16GB, NVMe</td>
+              <td>9960X, 2× RTX 5070 Ti 16GB, 32GB</td>
+              <td>3700X, RTX 2070S, 64GB, Win 11</td>
+            </tr>
+            <tr>
+              <td><strong>Job</strong></td>
+              <td>Alerting, front door</td>
+              <td>All state, metrics</td>
+              <td>Inference, agent</td>
+              <td>Gaming</td>
             </tr>
             <tr>
               <td><strong>Failure mode</strong></td>
               <td>SD card death</td>
               <td>OOM, disk fill</td>
+              <td>GPUs on another job</td>
               <td>You start a game</td>
             </tr>
             <tr>
-              <td><strong>Good at</strong></td>
-              <td>Watchdog, DNS</td>
-              <td>Stateful services</td>
-              <td>Burst compute</td>
-            </tr>
-            <tr>
-              <td><strong>Bad at</strong></td>
-              <td>Anything heavy</td>
-              <td>Sustained CPU/GPU</td>
-              <td>Being available</td>
+              <td><strong>Trusted with</strong></td>
+              <td>Saying something is wrong</td>
+              <td>Anything that must survive a reboot</td>
+              <td>Work that can be skipped</td>
+              <td>Nothing</td>
             </tr>
           </tbody>
         </table>
@@ -758,28 +898,29 @@
 
       <h3 class="reveal-child">Why the work is split this way</h3>
       <p class="reveal-child">
-        <strong>The desktop is unreliable by design.</strong> It is a gaming machine first, so it
-        disappears without warning. That is treated as an input, not a defect: nothing
-        stateful is placed on it, it owns no queue, and no alert fires when it vanishes.
-        Alerting on a node that is <em>expected</em> to go offline just trains alert-blindness.
-        What it is genuinely good at is burst GPU work, so that is all it gets —
-        inference and headless browser workers, both of which can fail and be retried.
+        <strong>forge holds anything that must survive a reboot.</strong> Databases, the queue
+        broker, bookkeeping, metrics history and the camera archive. It is the box with
+        the real availability guarantee and fast local storage, so it is the only node
+        trusted with state.
       </p>
       <p class="reveal-child">
-        <strong>The OptiPlex holds anything that must survive a reboot.</strong> Databases, the queue
-        broker, dashboards, bookkeeping. It is the only node with a real availability
-        guarantee, so it is the only node trusted with state.
+        <strong>sentinel exists to watch the others.</strong> ~5W, separate power, separate storage,
+        separate failure modes — so when forge falls over, the thing that says so is not
+        part of the outage (ADR-0001). The service dashboard lives here too: a front door
+        that dies with the box it points at is not useful.
       </p>
       <p class="reveal-child">
-        <strong>Headless browser work runs on the desktop, orchestrated from the OptiPlex.</strong>
-        Each Chromium worker costs 300–500MB. Running a scraping pipeline on a 16GB box
-        alongside the databases would flatten it. Splitting orchestration from execution
-        means the small always-on node keeps the queue and the state, while the big
-        unreliable node does the expensive, interruptible part.
+        <strong>synapse does the GPU work, and nothing critical waits on it.</strong> It serves the
+        agent's model and enriches other pipelines, but it is treated as optional: it gets
+        torn down for benchmarking, and its GPUs get lent to other projects. Every
+        consumer is built so that synapse being down costs a feature, never an alert.
       </p>
       <p class="reveal-child">
-        <strong>The Pi exists to watch the others.</strong> ~5W, separate power draw, separate
-        storage, separate failure modes — see ADR-0001.
+        <strong>The desktop is unreliable by design, and has been written out of the critical path.</strong>
+        It is a gaming machine first and disappears without warning. It used to be the
+        burst-inference host; that job moved to synapse, which is always-on by design. It
+        still reports metrics, deliberately never alerts — alerting on a node that is
+        <em>expected</em> to go offline just trains alert-blindness.
       </p>
     </div>
   </section>
@@ -787,46 +928,223 @@
   <section id="what-is-running" class="reveal panel panel--green">
     <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>What is running</h2></div>
     <div class="panel-body">
-      <p class="reveal-child">Containerized on the always-on node, managed through Portainer:</p>
+      <p class="reveal-child">Containerized, each node with its own Portainer, every service addressed by Tailscale name:</p>
       <div class="table-wrap reveal-child">
         <table>
           <thead>
             <tr>
+              <th>Node</th>
               <th>Role</th>
               <th>Component</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Container management</td>
-              <td>Portainer</td>
-            </tr>
-            <tr>
-              <td>Uptime monitoring and alerting</td>
-              <td>Uptime Kuma</td>
-            </tr>
-            <tr>
-              <td>Service dashboard</td>
-              <td>Homepage</td>
-            </tr>
-            <tr>
-              <td>Relational database</td>
-              <td>PostgreSQL, with pgAdmin</td>
-            </tr>
-            <tr>
-              <td>Queue broker</td>
-              <td>Redis</td>
-            </tr>
-            <tr>
-              <td>Double-entry bookkeeping</td>
-              <td>Manager.io</td>
-            </tr>
+            <tr><td>sentinel</td><td>Uptime monitoring and alerting</td><td>Uptime Kuma</td></tr>
+            <tr><td>sentinel</td><td>Service dashboard (sees all nodes)</td><td>Homepage</td></tr>
+            <tr><td>forge</td><td>Metrics and dashboards</td><td>Prometheus, Grafana, node-exporter, cAdvisor</td></tr>
+            <tr><td>forge</td><td>Relational database, queue broker</td><td>PostgreSQL with pgAdmin, Redis</td></tr>
+            <tr><td>forge</td><td>Double-entry bookkeeping</td><td>Manager.io</td></tr>
+            <tr><td>forge</td><td>Camera ingest, archive, alerts</td><td>blink-watch + detector (custom)</td></tr>
+            <tr><td>forge</td><td>Boot-time self-repair</td><td>docker-port-healer (systemd)</td></tr>
+            <tr><td>synapse</td><td>Local inference</td><td>vLLM — Qwen3.6-35B-A3B, NVFP4, 2-GPU</td></tr>
+            <tr><td>synapse</td><td>AI agent (Discord)</td><td>Hermes Agent</td></tr>
+            <tr><td>synapse</td><td>Agent egress allowlist, search</td><td>Squid, SearXNG</td></tr>
+            <tr><td>forge, synapse</td><td>Read-only Docker API for the dashboard</td><td>docker-socket-proxy</td></tr>
+            <tr><td>desktop</td><td>Host and GPU metrics</td><td>windows_exporter, GPU exporter</td></tr>
           </tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <section id="blink-watch" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Project — Blink smart alerts</h2></div>
+    <div class="panel-body">
       <p class="reveal-child">
-        Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
-        the host/GPU exporters) are deployed but not yet configured — see Build status.
+        Blink's cameras record to a USB drive on the Sync Module for free, but anything
+        smarter than "motion happened" sits behind a subscription. This pipeline pulls each
+        clip off the module, archives it on forge, alerts on Discord, and then has the
+        local model on synapse describe what is in it — a one-line push notification like
+        "Delivery driver leaves a package at the front door."
+      </p>
+
+      <h3 class="reveal-child">How a clip moves</h3>
+      <ol class="pipeline">
+        <li class="reveal-child"><strong>Ingest on forge.</strong> A watcher polls the Sync Module's local-storage
+          manifest through <code>blinkpy</code>, downloads each new clip, and files it as
+          camera / date / time with a JSON sidecar recording every timing.</li>
+        <li class="reveal-child"><strong>Alert immediately.</strong> The raw clip is posted to Discord the moment it
+          lands. <strong>The alert never waits on AI</strong> — that is the one hard constraint.</li>
+        <li class="reveal-child"><strong>Describe in the background.</strong> A detector service re-encodes the clip small
+          (2 fps, 640px, no audio — this bounds tokens per clip and drops a broken first
+          packet Blink writes) and sends the whole clip, as video, to vLLM on synapse.</li>
+        <li class="reveal-child"><strong>Follow up.</strong> The one-sentence description posts as a reply under the
+          alert and is written into the sidecar. If synapse is down, the clip still saves
+          and still alerts — it just gets no description. No fallback, by choice.</li>
+      </ol>
+
+      <h3 class="reveal-child">How it got there — three designs in two days</h3>
+      <p class="reveal-child">
+        <strong>Object detection first.</strong> YOLO26n through ONNX Runtime on two of forge's CPU
+        threads, posting a copy of the clip with boxes drawn. It proved the plumbing and
+        kept up easily, but a boxed video on a phone answers nothing a sentence does not
+        answer faster.
+      </p>
+      <p class="reveal-child">
+        <strong>Then small vision models on forge's CPU.</strong> 0.8B–2B VLMs, single frames, then
+        three frames chained with notes carried between them. Accurate enough, but
+        39–224 seconds per clip on a 35W quad-core — a description that arrives four
+        minutes after the alert is history, not a notification.
+      </p>
+      <p class="reveal-child">
+        <strong>Then the cheapest option, checked last when it should have been first:</strong> the
+        35B model synapse already serves for the agent accepts video natively; vision had
+        simply been switched off at launch. Turning it on cost nothing measurable — agent
+        throughput 238 vs 240 tok/s, the same reasoning and retrieval scores, roughly the
+        same VRAM — and the first real clip was described in <strong>2.6 seconds</strong>. No
+        second model, no extra GPU memory, and the CPU experiments were deleted.
+      </p>
+
+      <p class="reveal-child shots-intro">
+        The same Discord channel across all four stages, unedited apart from cropping. Each
+        reply's own footer is the receipt: model, frames, and how long it took.
+      </p>
+      <div class="shots reveal-child">
+        <figure>
+          <img src="img/blink/1-raw.jpg" width="720" height="480" loading="lazy"
+               alt="Discord alert from the Blink bot: 'Motion — Tilt Medusa Cam', with the raw clip attached.">
+          <figcaption><span class="shot-step">1 · Raw clip</span>Alert with the clip attached. No AI yet.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/2-yolo.jpg" width="720" height="432" loading="lazy"
+               alt="Follow-up reply 'person 0.89 (16/48 frames, 2.0s)' with a bounding box drawn around a person.">
+          <figcaption><span class="shot-step">2 · YOLO26n on CPU</span><strong>2.0s</strong>. Fast and correct, but a box tells you little.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/3-cpu-vlm.jpg" width="720" height="517" loading="lazy"
+               alt="Follow-up reply describing a person on a couch holding a phone, footer '(qwen3-vl:2b, 3 frames, 222s)'.">
+          <figcaption><span class="shot-step">3 · 2B VLM on CPU</span>A real sentence, in <strong>222s</strong>.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/4-chained.jpg" width="720" height="603" loading="lazy"
+               alt="Follow-up reply from qwen3.5:0.8b describing a man on a couch in purple lighting, footer 'frames at 1.47s, 1.93s, 39s'.">
+          <figcaption><span class="shot-step">4 · 0.8B, chained frames</span>Two models side by side. Best case <strong>39s</strong>.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/5-synapse.jpg" width="720" height="603" loading="lazy"
+               alt="Follow-up reply from qwen36-35b@synapse: 'Person walks down the driveway towards the house. (video 2fps/640px, 214KB, 1s)'. The camera frame is pixelated.">
+          <figcaption><span class="shot-step">5 · 35B on synapse, whole clip as video</span>One push-notification sentence in <strong>1s</strong>.</figcaption>
+        </figure>
+      </div>
+      <p class="reveal-child shots-note">
+        Faces and the exterior view are pixelated. The captions are what matter.
+      </p>
+
+      <h3 class="reveal-child">Bugs worth keeping</h3>
+      <ul>
+        <li class="reveal-child"><strong>Blink lies about frame rate.</strong> The reported rate is far above the real
+          (low, variable) one, so frame-index arithmetic put second 3 of a 10-second clip
+          past the end of the file. Frames are now picked by real presentation timestamp.</li>
+        <li class="reveal-child"><strong>New cameras were silently dropped.</strong> The library learns camera names once at
+          startup and discards clips from any camera it does not know. Unknown cameras are
+          now accepted and trigger a re-read of the camera list from the cloud.</li>
+        <li class="reveal-child"><strong>Renaming a camera re-posted its entire history.</strong> Seen-clip keys included the
+          camera name. They now key on recording time alone, and anything older than an hour
+          is marked seen rather than posted — alerts are for what is happening now.</li>
+        <li class="reveal-child"><strong>Polling made the app say "system busy".</strong> Every manifest poll is a command the
+          Sync Module must process, and it collides with arm/disarm. A 48-hour probe logged
+          every read-only cloud endpoint on change and scored each field's precision and
+          recall against real clips, to find a cloud-side motion signal that can gate the
+          poll. Choosing the trigger from that data is the open step.</li>
+        <li class="reveal-child"><strong>A login storm.</strong> A fatal error under <code>restart: unless-stopped</code>
+          re-logged into Blink every second. Fatal paths now back off ten minutes before
+          exiting.</li>
+      </ul>
+
+      <h3 class="reveal-child">Tradeoffs, stated plainly</h3>
+      <p class="reveal-child">
+        Latency is minutes, not seconds — a clip appears only after recording finishes and
+        the module uploads it. Clips transit Blink's cloud on the way down, so this is not
+        fully local. The API is unofficial and one manifest read uses a private library
+        attribute, so the library is pinned to a known commit. The YOLO stack is AGPL —
+        fine privately, not something to hand a client. And the archive is a single copy
+        on one NVMe with no retention policy yet, which is the backups gap below.
+      </p>
+
+      <div class="table-wrap reveal-child">
+        <table>
+          <thead>
+            <tr><th>Stage</th><th>State</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Clip ingest, archive, Discord alert</td><td><span class="pill pill--green">Running</span></td></tr>
+            <tr><td>Descriptions from synapse's vLLM</td><td><span class="pill pill--green">Running</span></td></tr>
+            <tr><td>Cloud-side motion trigger to replace polling</td><td><span class="pill pill--amber">Analysing probe</span></td></tr>
+            <tr><td>Filter alerts (e.g. people only)</td><td><span class="pill pill--rose">After a trust period</span></td></tr>
+            <tr><td>Archive to a NAS</td><td><span class="pill pill--rose">When the NAS exists</span></td></tr>
+            <tr><td>Home Assistant reading the same archive</td><td><span class="pill pill--rose">Later</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="local-ai" class="reveal panel">
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Local AI — synapse</h2></div>
+    <div class="panel-body">
+      <p class="reveal-child">
+        A fully local agent on a fully local model, reachable over Discord, with web search
+        and no paid APIs in the steady state.
+      </p>
+      <ul>
+        <li class="reveal-child"><strong>Inference:</strong> vLLM serving Qwen3.6-35B-A3B at NVFP4, tensor-parallel across
+          both 16GB cards, 262K context, vision enabled. Chosen over a dense 27B after a
+          benchmark tied them on reasoning and tool use at 238 vs ~102 tok/s and 262K vs
+          ~88K context.</li>
+        <li class="reveal-child"><strong>Tuned from failures, not defaults.</strong> The speculative-decoding draft head
+          requested unprofiled memory and OOM-crashed vLLM twice, so it is off. Automatic
+          KV-cache sizing left ~76MB free per card, so the cache is a fixed size with real
+          headroom. Prefix caching caused long-prompt hangs on this hybrid architecture, so
+          it is off.</li>
+        <li class="reveal-child"><strong>Agent:</strong> Hermes Agent in a container — non-root, no Docker socket,
+          <code>no-new-privileges</code>, 4GB and 512-PID limits. Only allowlisted Discord users
+          can command it, and memory or skill writes need explicit approval before they
+          persist.</li>
+      </ul>
+
+      <h3 class="reveal-child">Containment is the network, not the tooling</h3>
+      <p class="reveal-child">
+        Prompt injection steering a tool call cannot be filtered out of web content
+        reliably, so the design limits what an injected agent can do rather than what it
+        can read. The agent sits on a Docker network created <code>--internal</code>: no gateway,
+        no NAT, no route off the box. Squid and SearXNG are the only containers on both that
+        network and an uplink, so they are the only exits, and Squid allows HTTPS to Discord
+        and five exact GitHub hosts — nothing else. Package indexes are deliberately blocked.
+        Dropping a proxy setting costs the agent its egress instead of granting it free
+        egress.
+      </p>
+      <p class="reveal-child">
+        The read-only Docker API the dashboard uses is deliberately off the agent's network;
+        reaching it directly, through the proxy, and by container name was each verified to
+        fail.
+      </p>
+      <p class="reveal-child">
+        <strong>Residual risks, written down rather than implied away:</strong> the Discord token is
+        readable inside the agent's container (a credential-injecting proxy would fix it and
+        is not built); the shell tool can write anywhere in the container, so the container
+        is the sandbox; fetched URLs and search queries are small exfiltration channels; and
+        the model API is open to every tailnet device without a key, the price of letting
+        the watchdog health-check it.
+      </p>
+
+      <div class="callout reveal-child">
+        <p>Next phase, not running yet: Hermes builds, Claude reviews.</p>
+      </div>
+      <p class="reveal-child">
+        Hermes takes a scoped task in Discord, works on a branch and opens a pull request —
+        never pushing to <code>main</code>. Claude Code reviews it; the review goes back to Hermes
+        or the PR is merged by hand. Waiting on a fine-grained token limited to selected
+        repositories, contents and pull requests only, with a short expiry.
       </p>
     </div>
   </section>
@@ -837,23 +1155,25 @@
       <p class="reveal-child">Conventions applied across every compose file in the private config repo:</p>
       <ul>
         <li class="reveal-child"><strong>Every container has a <code>mem_limit</code>.</strong> A 16GB host with unbounded containers
-          is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
-          sized deliberately so it fits alongside the services it observes.</li>
-        <li class="reveal-child"><strong>Image tags are pinned to explicit versions</strong>, never <code>latest</code>. A rebuild
-          reproduces the same stack rather than silently pulling a new major version.</li>
+          is an OOM waiting to happen. The camera detector is additionally capped at two CPU
+          threads so a burst of clips cannot starve the databases.</li>
+        <li class="reveal-child"><strong>Versions are pinned where a rebuild depends on them</strong> — the inference server,
+          the metrics stack, the egress proxy, the camera library. Several web front-ends and
+          the agent image still track <code>latest</code>; that is a known gap, not a policy.</li>
         <li class="reveal-child"><strong>Config is bind-mounted, state lives in named volumes.</strong> Config is in git;
           state deliberately is not. The repo plus a Tailscale login is the rebuild path.</li>
         <li class="reveal-child"><strong>Reachability is a firewall property, not a bind-address property.</strong> Docker
           continues to listen on all interfaces so containers can reach one another and
-          the host; the packet filter is what decides who gets through. See Network
-          security model.</li>
-        <li class="reveal-child"><strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> This is
-          what makes a service portable between nodes: moving it becomes a volume copy
-          rather than a config rewrite. The one exception is Docker port bindings, which
-          require a literal address at bind time.</li>
+          the host; the packet filter is what decides who gets through.</li>
+        <li class="reveal-child"><strong>Services address each other by Tailscale MagicDNS name, not IP.</strong> Moving a
+          service between nodes becomes a volume copy rather than a config rewrite. Names
+          are set explicitly at join time — Tailscale otherwise derives them from the OS
+          hostname, and they silently stop matching the configs. That has cost an hour once.</li>
         <li class="reveal-child"><strong>Secrets never reach the repository.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
           documents every variable with placeholder values, and <code>gitleaks</code> runs against
           staged changes before every push.</li>
+        <li class="reveal-child"><strong>Agents propose, a human executes.</strong> AI-assisted changes land as reviewable
+          commits and scripts; destructive commands and deployments stay human-gated.</li>
       </ul>
     </div>
   </section>
@@ -868,22 +1188,21 @@
       <ul>
         <li class="reveal-child"><strong>Tailscale is the only transport between nodes.</strong> A WireGuard-based mesh
           carries all inter-node traffic. There is no port forwarding on the router, no
-          reverse proxy exposed to the internet, and no public ingress of any kind.</li>
+          reverse proxy exposed to the internet, and no public ingress of any kind. The
+          camera pipeline is outbound-only and publishes nothing.</li>
         <li class="reveal-child"><strong>Access is authenticated per device, not per network.</strong> A machine reaches
           services because it has authenticated onto the tailnet — not because it
           happens to sit on the right LAN. Revoking a device removes its access
-          everywhere at once, rather than requiring a firewall change.</li>
-        <li class="reveal-child"><strong>The firewall is the enforcement boundary.</strong> Docker deliberately still
-          listens on all interfaces, so containers and the host can talk to each other
-          without special-casing every service. External traffic is filtered in the
+          everywhere at once.</li>
+        <li class="reveal-child"><strong>The firewall is the enforcement boundary.</strong> External traffic is filtered in the
           <code>DOCKER-USER</code> chain — evaluated ahead of Docker's own accept rules — so only
           packets arriving over the Tailscale interface reach a published port. Host
           SSH is restricted to the same interface via UFW.</li>
-        <li class="reveal-child"><strong>The desktop is firewalled to the tailnet range</strong> for the exporter ports it
-          publishes, so an exporter cannot be scraped from anywhere else.</li>
-        <li class="reveal-child"><strong>Secrets stay out of version control.</strong> <code>.env</code> is gitignored, <code>.env.example</code>
-          documents every required variable with placeholder values, and <code>gitleaks</code> is
-          run against staged changes before every push.</li>
+        <li class="reveal-child"><strong>The dashboard never gets a raw Docker socket.</strong> It reads container state
+          from each node through a read-only socket proxy, because a <code>docker.sock</code> over
+          the network is root on the node holding all the state.</li>
+        <li class="reveal-child"><strong>The agent is contained by topology.</strong> An internal-only network with a single
+          allowlisting proxy as its exit — see Local AI above.</li>
       </ul>
 
       <div class="feature-panel reveal-child">
@@ -910,11 +1229,8 @@
             system that reports itself as closed while it is open, so everything built on
             top of it inherits a false assumption. The fix was to stop treating bind
             addresses as a security control and put enforcement in the packet filter
-            instead: rules in the <code>DOCKER-USER</code> chain, which is evaluated ahead of Docker's
-            own accept rules, admit only traffic arriving over the Tailscale interface.
-            Host SSH was locked to that same interface with UFW. Containers still listen
-            broadly so they can reach one another and the host — reachability is decided at
-            the filter, not at the socket.
+            instead: rules in the <code>DOCKER-USER</code> chain admit only traffic arriving over the
+            Tailscale interface, and host SSH is locked to that same interface with UFW.
           </p>
           <p>
             The tradeoff is deliberate and worth stating: enforcement is now a single
@@ -932,9 +1248,9 @@
       </div>
 
       <p class="reveal-child">
-        Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
-        restricting which node may reach which service, and network isolation for agent
-        runtimes so a runtime cannot reach the rest of the stack.
+        Planned hardening: single sign-on in front of the web interfaces, and tailnet ACLs
+        restricting which device may reach which service — which would also close the
+        keyless model API.
       </p>
     </div>
   </section>
@@ -943,83 +1259,91 @@
     <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Architecture decisions</h2></div>
     <div class="panel-body">
       <p class="reveal-child">
-        Decisions are recorded as ADRs at the time they are made, rather than
-        reconstructed afterwards. The configs show <em>what</em> runs; the ADRs record <em>why</em>.
+        Decisions are recorded as ADRs at the time they are made, and amended or superseded
+        in place when they stop being true — rather than quietly rewritten. The configs show
+        <em>what</em> runs; the ADRs record <em>why</em>, including the ones that turned out wrong.
       </p>
       <p class="reveal-child">
-        <strong>ADR-0001 — monitoring moved off the box it monitors.</strong> Uptime Kuma was
-        originally installed on the OptiPlex, simply because that is where everything
-        else already lived. That made the OptiPlex a single point of failure for knowing
-        whether the OptiPlex was up: if it OOMs, fills its disk, or reboots for updates,
-        monitoring stops at the same instant the thing being monitored stops — and the
-        failure is silent, because the alerting is part of the outage. Alerting must not
-        share a failure domain with the thing it watches. Uptime Kuma therefore moves to
-        the Pi: an independent observer with its own power, storage and failure modes.
+        <strong>ADR-0001 — alerting must not share a failure domain with what it watches.</strong>
+        Uptime Kuma started on forge, which made forge a single point of failure for knowing
+        whether forge was up. It moved to the Pi. Prometheus and Grafana briefly followed it
+        there and then moved back: they answer "what was memory doing before the crash",
+        which is read afterwards from a box that is back up. The argument was always about
+        notification, not diagnosis, and the ADR stands as written.
       </p>
       <p class="reveal-child">
-        Prometheus, Grafana and Homepage deliberately stay on the OptiPlex. They serve a
-        different purpose — diagnosis after the fact, not notification in the moment.
-        Only the second needs to survive the outage. A dashboard being unreachable
-        during an outage is accepted: during an outage there is nothing to look at.
+        <strong>ADR-0002 — reachability is enforced in the firewall.</strong> See the featured panel above.
       </p>
       <p class="reveal-child">
-        <strong>Alerting deliberately excludes the desktop.</strong> Alerting on a node expected to
-        disappear produces noise, and noise produces ignored alerts.
+        <strong>ADR-0003 — contain an agent at the network layer, not just in config.</strong> Written for
+        an earlier runtime on forge and now superseded, but its reasoning — internal-only
+        network, proxy as sole exit, fail closed — is exactly what synapse runs today.
       </p>
       <p class="reveal-child">
-        <strong>A dedicated local AI node is deferred, with a defined trigger.</strong> The hybrid
-        local + hosted inference routing already covers the work the 2070 Super cannot.
-        A dedicated GPU build is deferred until a specific spend threshold is crossed,
-        rather than bought speculatively — the discipline being that hardware must fix a
-        fault that exists now, or remove a ceiling actually being hit.
+        <strong>ADR-0004 — use the agent's built-in memory, not a vector database.</strong> The plan picked
+        a vector store on the premise that built-in memory was keyword-only. Installing it
+        showed the premise was wrong on every point: the built-in engine already did hybrid
+        keyword-and-vector search over plain markdown files, and the vector store held zero
+        rows for its entire life while the built-in system quietly did the work. The ADR
+        exists so the reversal is recorded rather than rediscovered.
+      </p>
+      <p class="reveal-child">
+        <strong>ADR-0005 — split runtimes by trust zone, then collapse back to one.</strong> A research
+        runtime and an execution runtime, separated by a human-moved file. Once the local
+        agent proved it could do both jobs, the second runtime was removed as redundant and
+        the ADR amended — including the parts of its security section that were never
+        actually built.
+      </p>
+      <p class="reveal-child">
+        <strong>Building synapse was not justified by the spend rule, and that is written down.</strong>
+        Hardware here must fix a fault that exists now, remove a ceiling actually being hit,
+        or pay back within about six months. The GPU node was built on other grounds. That is
+        a legitimate decision — but the rule is not allowed to be quietly treated as though it
+        passed.
+      </p>
+      <p class="reveal-child">
+        <strong>The camera pipeline puts ingest on forge and AI on synapse.</strong> Clips are state, and
+        state lives on forge's NVMe, not the Pi's microSD. Descriptions are enrichment, so they
+        live on the node allowed to disappear.
       </p>
     </div>
   </section>
 
   <section id="migrations" class="reveal panel">
-    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Migrations</h2></div>
+    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Migrations and incidents</h2></div>
     <div class="panel-body">
       <ul>
-        <li class="reveal-child"><strong>Uptime Kuma → Pi.</strong> Planned move off the monitored host, per ADR-0001.
-          Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
-          is useful practice, and because every monitor targets a MagicDNS name rather
-          than an IP, the second pass is a volume copy rather than a rewrite.</li>
+        <li class="reveal-child"><strong>A power surge broke every published port — the services were fine.</strong> After an
+          unclean shutdown, every container on forge restored with correct port config but no
+          live port mappings: every monitor red, every service healthy. Docker's network state
+          is not crash-safe, and neither restarting containers nor the daemon rebuilds it —
+          only recreating the container does. Confirmed by elimination on the box, then fixed
+          with a boot-time healer that recreates only containers whose bindings are configured
+          but not live. A no-op on a clean boot. It found one more problem on the way: a
+          container started by hand, with no compose metadata, could not be recreated at all —
+          so it became a compose stack too.</li>
+        <li class="reveal-child"><strong>Built the GPU node and moved inference onto it.</strong> A dual-GPU Threadripper
+          replaced the gaming desktop as the inference host, which dissolved the "what does
+          the agent do when the desktop goes offline" problem rather than answering it.</li>
+        <li class="reveal-child"><strong>Agent runtime, three reversals.</strong> One runtime chosen, reversed for another,
+          split into two by trust zone, and finally collapsed to one local agent on synapse.
+          The removed runtime's config was deleted from the repo rather than left as files for
+          a stack that will not exist.</li>
+        <li class="reveal-child"><strong>Uptime Kuma and Homepage → Pi.</strong> Done, per ADR-0001. Because every monitor
+          targets a MagicDNS name rather than an IP, the move was a volume copy rather than a
+          rewrite.</li>
+        <li class="reveal-child"><strong>Docker firewall lockdown.</strong> Audited the tailnet-only invariant, found
+          published container ports reachable from the LAN, and moved enforcement into
+          <code>DOCKER-USER</code>. See ADR-0002.</li>
+        <li class="reveal-child"><strong>Removed a container that did nothing.</strong> A browser worker ran
+          <code>tail -f /dev/null</code> against a directory that never existed in git — Docker
+          created it empty on every deploy. Deleted rather than propped up.</li>
         <li class="reveal-child"><strong>OptiPlex board replacement and 8→16GB RAM upgrade.</strong> Fixed a real fault and
           lifted a ceiling that was actually being hit, which is what justified it.</li>
-        <li class="reveal-child"><strong>Docker firewall lockdown.</strong> Audited the tailnet-only invariant, found
-          published container ports reachable from the LAN because Docker bypasses UFW,
-          and moved enforcement into the <code>DOCKER-USER</code> chain with SSH restricted via
-          UFW. See ADR-0002.</li>
-        <li class="reveal-child"><strong>Monitoring stack rollout.</strong> Prometheus recording rules pre-compute the
-          values the dashboard displays, because the dashboard widget passes PromQL in a
-          URL query string and long expressions become an encoding problem. Collapsing
-          each to a single short metric name keeps the dashboard config readable.</li>
+        <li class="reveal-child"><strong>Monitoring rollout.</strong> Prometheus recording rules pre-compute the values the
+          dashboard displays, because the widget passes PromQL in a URL query string and long
+          expressions become an encoding problem.</li>
       </ul>
-    </div>
-  </section>
-
-  <section id="planned-agent-orchestration" class="reveal panel panel--rose">
-    <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Planned — agent orchestration</h2></div>
-    <div class="panel-body">
-      <div class="callout reveal-child">
-        <p>Nothing in this section is running today.</p>
-      </div>
-      <p class="reveal-child">
-        It is the next phase of the build, recorded here as direction rather than achievement.
-      </p>
-      <p class="reveal-child">
-        The intent is a managed cluster of AI agents handling day-to-day operational
-        work — monitoring triage, routine maintenance, bookkeeping and document intake —
-        orchestrated from the always-on node, with GPU-heavy steps dispatched to the
-        desktop and hosted models used where local capacity falls short.
-      </p>
-      <p class="reveal-child">
-        The placement logic is the same as everywhere else in this homelab: orchestration
-        and state on the reliable node, expensive interruptible compute on the unreliable
-        one. Agent runtimes are intended to be network-isolated from the rest of the
-        stack, so that a compromised or misbehaving runtime cannot reach the databases or
-        the queue broker.
-      </p>
     </div>
   </section>
 
@@ -1036,14 +1360,12 @@
           <div class="status-header"><span class="status-pill">Running now</span></div>
           <div class="status-body">
             <p>
-              Three-node role split with workloads placed by node
-              reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
-              firewall after an audit found Docker bypassing UFW (ADR-0002).
-              Containerized always-on stack — container management, uptime monitoring and
-              alerting, service dashboard, relational database, queue broker and bookkeeping —
-              every container under an explicit memory limit and a pinned image tag. Hybrid
-              local + hosted inference routing. Infrastructure-as-config repository with ADR
-              practice and secret scanning on every push.
+              Four-node split with workloads placed by node reliability. Tailscale-only mesh
+              enforced in the firewall (ADR-0002). Independent alerting and dashboard on the
+              Pi. Stateful stack, metrics and bookkeeping on forge, every container under a
+              memory limit, with boot-time port self-repair. Local 35B inference and a
+              network-contained agent on synapse. Blink camera alerts with AI descriptions.
+              ADR practice and secret scanning on every push.
             </p>
           </div>
         </div>
@@ -1052,8 +1374,9 @@
           <div class="status-header"><span class="status-pill">In progress</span></div>
           <div class="status-body">
             <p>
-              Metrics collection and time-series dashboards, deployed but not
-              yet configured. Host and GPU exporters. API spend dashboard widget.
+              Choosing a cloud-side motion trigger for the camera pipeline from the 48-hour
+              probe data. Agent-opens-PR, Claude-reviews workflow, pending a scoped token.
+              Pinning the images that still track <code>latest</code>.
             </p>
           </div>
         </div>
@@ -1062,10 +1385,11 @@
           <div class="status-header"><span class="status-pill">Next</span></div>
           <div class="status-body">
             <p>
-              Raspberry Pi watchdog node, and with it the ADR-0001 migration of
-              uptime monitoring off the host it monitors. DNS filtering. Workflow
-              orchestration and document management. Single sign-on and tailnet ACLs. The
-              agent orchestration cluster described above.
+              <strong>Data backups</strong> — the largest unaddressed risk: databases, documents,
+              monitoring history and the camera archive are single-copy today. Designed as
+              peer-to-peer nightly snapshots across nodes, with quarterly restore tests. Then
+              DNS filtering, single sign-on and tailnet ACLs, people-only camera alerts, and a
+              NAS once peer storage runs out.
             </p>
           </div>
         </div>
@@ -1084,7 +1408,7 @@
   </section>
 
   <footer>
-    <p>Homelab — infrastructure-as-config, built and documented in public.</p>
+    <p>Homelab — infrastructure-as-config, built and documented in public. Updated October 2026.</p>
   </footer>
 
 </main>
