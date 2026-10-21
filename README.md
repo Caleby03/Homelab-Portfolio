@@ -133,11 +133,53 @@ this is not fully local. The API is unofficial and one read uses a private
 library attribute, so the library is pinned to a known commit. The YOLO stack is
 AGPL. The archive is a single copy with no retention policy yet.
 
+### v2 — a Pi Zero 2 W where the USB drive was
+
+**Designed, not built. One unverified assumption decides whether it works at all.**
+
+Most of v1's problems come from one fact: the clips sit on a drive only the Sync
+Module can read, so every clip has to be asked for through Blink's cloud. v2
+removes that. A Raspberry Pi Zero 2 W plugs into the Sync Module's USB port and
+presents itself as a USB drive (Linux USB gadget mode), backed by a disk image
+on the Pi's own storage. The Sync Module records to it as it does to any drive,
+and the Blink app keeps working. But the Pi can see each file the moment it is
+written, and send it to forge over Tailscale. The Pi keeps nothing: it forwards
+clips and keeps only a short buffer.
+
+| v1 problem | What v2 changes |
+|---|---|
+| Latency is minutes | No upload round-trip. Seconds after the clip is closed, bounded by how often the Pi re-reads the drive. |
+| Clips transit Blink's cloud | Clips go from the camera to the Sync Module, then the Pi, then forge. Fully local. |
+| Polling makes the app say "system busy" | No commands are sent to the Sync Module at all. The cloud-trigger probe becomes unnecessary. |
+| Unofficial API, private attribute, pinned library | No Blink account in the ingest path. No login, no tokens, no 2FA. |
+| New or renamed cameras | Depends on how the module names files on the drive. Unknown until it is looked at. |
+| Single-copy archive | Unchanged. That is the backups work, not this. |
+
+**Checked before anything is bought, in this order:**
+
+- **Are the clips readable on the drive?** Blink's documentation suggests clips
+  stored on the drive cannot be played on a computer, which would mean they are
+  encrypted. If so, v2 does not work as designed and v1 stays. This is a
+  10-minute test: copy a few clips off the current drive and try to open them.
+- **Reading a drive someone else is writing.** In gadget mode the Sync Module
+  owns the filesystem, and the Pi reading the same image underneath it can see
+  half-written or stale data. The usual approach is a read-only mount refreshed
+  on a short interval, only taking files that have stopped growing.
+- **Power.** The Pi running Wi-Fi may draw more than the Sync Module's USB port
+  supplies. A separate power supply is likely.
+- **SD wear.** Continuous video writes to a microSD card; use a high-endurance
+  card and treat the Pi as disposable.
+
+Cost is roughly a Pi Zero 2 W and a card. Under the spend rule it fixes faults
+that exist now, so it would pass, but only after the first check comes back
+clean.
+
 | Stage | State |
 |---|---|
 | Clip ingest, archive, Discord alert | Running |
 | Descriptions from synapse's vLLM | Running |
 | Cloud-side motion trigger to replace polling | Analysing probe |
+| v2: Pi Zero 2 W as the drive, fully local | Verify clip format first |
 | Filter alerts (e.g. people only) | After a trust period |
 | Archive to a NAS | When the NAS exists |
 | Home Assistant reading the same archive | Later |
@@ -289,7 +331,8 @@ track `latest`.
 
 **Next.** **Data backups** — the largest unaddressed risk; designed as
 peer-to-peer nightly snapshots with quarterly restore tests. Then DNS filtering,
-single sign-on and tailnet ACLs, people-only camera alerts, and a NAS.
+single sign-on and tailnet ACLs, a fully local Blink v2 on a Pi Zero 2 W,
+people-only camera alerts, and a NAS.
 
 ---
 

@@ -1057,6 +1057,60 @@
         on one NVMe with no retention policy yet, which is the backups gap below.
       </p>
 
+      <h3 class="reveal-child">v2 — a Pi Zero 2 W where the USB drive was</h3>
+      <div class="callout reveal-child">
+        <p>Designed, not built. One unverified assumption decides whether it works at all.</p>
+      </div>
+      <p class="reveal-child">
+        Most of v1's problems come from one fact: the clips sit on a drive only the Sync
+        Module can read, so every clip has to be asked for through Blink's cloud. v2 removes
+        that. A Raspberry Pi Zero 2 W plugs into the Sync Module's USB port and presents
+        itself as a USB drive (Linux USB gadget mode), backed by a disk image on the Pi's own
+        storage. The Sync Module records to it as it does to any drive, and the Blink app
+        keeps working. But the Pi can see each file the moment it is written, and send it to
+        forge over Tailscale. The Pi keeps nothing: it forwards clips and keeps only a short
+        buffer.
+      </p>
+      <div class="table-wrap reveal-child">
+        <table>
+          <thead>
+            <tr><th>v1 problem</th><th>What v2 changes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Latency is minutes</td><td class="wrap">No upload round-trip. Seconds after the clip is closed, bounded by how often the Pi re-reads the drive.</td></tr>
+            <tr><td>Clips transit Blink's cloud</td><td class="wrap">Clips go from the camera to the Sync Module, then the Pi, then forge. Fully local.</td></tr>
+            <tr><td>Polling makes the app say "system busy"</td><td class="wrap">No commands are sent to the Sync Module at all. The 48-hour probe for a cloud motion trigger becomes unnecessary.</td></tr>
+            <tr><td>Unofficial API, private attribute, pinned library</td><td class="wrap">No Blink account in the ingest path. No login, no tokens, no 2FA, no login storms.</td></tr>
+            <tr><td>New or renamed cameras</td><td class="wrap">Depends on how the module names files on the drive. Unknown until it is looked at.</td></tr>
+            <tr><td>Single-copy archive</td><td class="wrap">Unchanged. That is the backups work, not this.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="reveal-child">
+        <strong>Checked before anything is bought, in this order:</strong>
+      </p>
+      <ul>
+        <li class="reveal-child"><strong>Are the clips readable on the drive?</strong> Blink's documentation suggests clips
+          stored on the drive cannot be played on a computer, which would mean they are
+          encrypted. If so, v2 does not work as designed and v1 stays. This is a 10-minute
+          test: copy a few clips off the current drive and try to open them.</li>
+        <li class="reveal-child"><strong>Reading a drive someone else is writing.</strong> In gadget mode the Sync Module
+          owns the filesystem, and the Pi reading the same image underneath it can see half-written
+          or stale data. The usual approach is a read-only mount refreshed on a short interval,
+          only taking files that have stopped growing. Unplugging and replugging the drive
+          virtually to copy is the fallback, but the module may react badly to its drive
+          vanishing.</li>
+        <li class="reveal-child"><strong>Power.</strong> The Pi running Wi-Fi may draw more than the Sync Module's USB port
+          supplies. A separate power supply is likely.</li>
+        <li class="reveal-child"><strong>SD wear.</strong> Continuous video writes to a microSD card are the same problem
+          sentinel already has. Use a high-endurance card, and treat the Pi as disposable.</li>
+      </ul>
+      <p class="reveal-child">
+        Cost is roughly a Pi Zero 2 W and a card. Under the spend rule it fixes faults that
+        exist now (cloud transit, "system busy"), so it would pass, but only after the first
+        check comes back clean.
+      </p>
+
       <div class="table-wrap reveal-child">
         <table>
           <thead>
@@ -1066,6 +1120,7 @@
             <tr><td>Clip ingest, archive, Discord alert</td><td><span class="pill pill--green">Running</span></td></tr>
             <tr><td>Descriptions from synapse's vLLM</td><td><span class="pill pill--green">Running</span></td></tr>
             <tr><td>Cloud-side motion trigger to replace polling</td><td><span class="pill pill--amber">Analysing probe</span></td></tr>
+            <tr><td>v2: Pi Zero 2 W as the drive, fully local</td><td><span class="pill pill--rose">Verify clip format first</span></td></tr>
             <tr><td>Filter alerts (e.g. people only)</td><td><span class="pill pill--rose">After a trust period</span></td></tr>
             <tr><td>Archive to a NAS</td><td><span class="pill pill--rose">When the NAS exists</span></td></tr>
             <tr><td>Home Assistant reading the same archive</td><td><span class="pill pill--rose">Later</span></td></tr>
@@ -1374,7 +1429,8 @@
               <strong>Data backups</strong> — the largest unaddressed risk: databases, documents,
               monitoring history and the camera archive are single-copy today. Designed as
               peer-to-peer nightly snapshots across nodes, with quarterly restore tests. Then
-              DNS filtering, single sign-on and tailnet ACLs, people-only camera alerts, and a
+              DNS filtering, single sign-on and tailnet ACLs, a fully local Blink v2 on a Pi
+              Zero 2 W, people-only camera alerts, and a
               NAS once peer storage runs out.
             </p>
           </div>
