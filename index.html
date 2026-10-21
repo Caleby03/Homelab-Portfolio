@@ -108,10 +108,37 @@
     --code-bg: #1a1e26;
     --code-text: #c9beea;
 
-    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Same three faces as the Arcanet site, self-hosted (SIL OFL, licences in
+       assets/fonts/). Display for headings, an italic serif rationed to the one
+       phrase that carries a line, Geist for everything else. */
+    --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --display: "Bricolage Grotesque", var(--sans);
+    --serif: "Newsreader", Georgia, serif;
+    --em: #9fe0ef;
 
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("assets/fonts/BricolageGrotesque-Variable.woff2") format("woff2");
+    font-weight: 400 800; font-stretch: 75% 100%; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "Newsreader";
+    src: url("assets/fonts/Newsreader-Italic-Variable.woff2") format("woff2");
+    font-weight: 300 600; font-style: italic; font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist";
+    src: url("assets/fonts/Geist-Variable.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist Mono";
+    src: url("assets/fonts/GeistMono-Variable.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap;
   }
 
   * { box-sizing: border-box; }
@@ -182,19 +209,139 @@
   }
 
   h1 {
-    font-family: var(--sans);
-    font-size: clamp(1.9rem, 4vw + 0.6rem, 2.7rem);
-    font-weight: 700;
-    line-height: 1.08;
-    margin: 0 0 16px;
-    letter-spacing: -0.02em;
+    font-family: var(--display);
+    font-stretch: 96%;
+    font-size: clamp(2.4rem, 6vw + 0.6rem, 4.6rem);
+    font-weight: 720;
+    line-height: 1.0;
+    margin: 4px 0 22px;
+    letter-spacing: -0.035em;
     color: var(--text);
   }
 
-  header.page-header p { max-width: 660px; }
+  /* Headline words rise into place one at a time, Arcanet-style. Each word is
+     clipped by its own .w so it slides up from behind a baseline. */
+  h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; }
+  h1 .w > span {
+    display: inline-block;
+    transform: translateY(105%);
+    animation: wordUp 0.8s var(--ease) forwards;
+    animation-delay: calc(0.1s + var(--i) * 0.07s);
+  }
+  h1 .w.muted { color: var(--text-dim); }
+  h1 .w.em { padding: 0 0.14em 0.16em; margin: 0 -0.14em -0.08em; }
+  @keyframes wordUp { to { transform: none; } }
 
-  header.page-header p:nth-of-type(1) { font-size: 1.05em; color: var(--text-dim); }
-  header.page-header p:nth-of-type(2) { color: var(--text-faint); }
+  .em, h1 .em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-stretch: normal;
+    letter-spacing: -0.01em;
+    color: var(--em);
+  }
+
+  header.page-header .lead { max-width: 640px; font-size: 1.1em; color: var(--text-dim); }
+
+  .strip-text {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+  }
+
+  /* ---------- Stat row ---------- */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: 26px 0 8px;
+    border-top: 1px solid var(--border);
+  }
+  .stats > div { padding: 14px 16px 4px 0; }
+  .stats > div + div { padding-left: 16px; border-left: 1px solid var(--border); }
+  .stats dt {
+    font-family: var(--display);
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stats dd { margin: 6px 0 0; font-size: 0.86em; line-height: 1.4; color: var(--text-faint); }
+
+  /* ---------- Node map ---------- */
+
+  .topo { margin: 22px auto 0; max-width: 680px; }
+  .topo svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .topo .link { fill: none; stroke: var(--border-strong); stroke-width: 2; stroke-dasharray: 5 6; }
+  .topo .link-faint { stroke-opacity: 0.6; }
+  .topo .node rect { fill: var(--panel-header-bg); stroke: var(--border-strong); stroke-width: 1.5; }
+  .topo .n-sentinel rect { stroke: var(--cyan-border); }
+  .topo .n-forge rect { stroke: var(--emerald-border); }
+  .topo .n-synapse rect { stroke: var(--magenta-border); }
+  .topo .nled { animation: led-pulse 3.4s ease-in-out infinite; }
+  .topo .n-sentinel .nled { fill: var(--cyan); }
+  .topo .n-forge .nled { fill: var(--emerald); animation-delay: -1.1s; }
+  .topo .n-synapse .nled { fill: var(--magenta); animation-delay: -2.2s; }
+  .topo .nname { font-family: var(--mono); font-size: 19px; font-weight: 600; fill: var(--text); }
+  .topo .nrole { font-family: var(--sans); font-size: 14px; fill: var(--text-faint); }
+  .topo .tail { font-family: var(--mono); font-size: 13px; fill: var(--text-faint); text-anchor: middle; }
+  .topo .pk-hc { fill: var(--cyan); }
+  .topo .pk-clip { fill: var(--lime); }
+  .topo .pk-ai { fill: var(--magenta); }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+    margin-top: 10px;
+    font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint);
+  }
+  .legend .k { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 0; }
+  .k-hc { background: var(--cyan); }
+  .k-clip { background: var(--lime); }
+  .k-ai { background: var(--magenta); }
+
+  /* ---------- Margin notes ----------
+     A handful of hand-written asides with a drawn arrow, the way you'd mark up
+     your own notes. Rationed: four on the whole page. The arrow draws itself
+     when its panel reveals. */
+  .note {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: 4px 0 18px auto;
+    padding-right: 6px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.22rem;
+    line-height: 1.15;
+    color: var(--em);
+    transform: rotate(-3deg);
+  }
+  .note svg {
+    display: inline-block; width: 64px; height: 38px; margin-left: 8px;
+    vertical-align: -6px;
+    fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .note svg path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.7s var(--ease) 0.5s; }
+  .note svg path + path { transition-delay: 1.1s; transition-duration: 0.3s; }
+  .reveal.visible .note svg path { stroke-dashoffset: 0; }
+
+  /* ---------- Giant closing statement ---------- */
+
+  .giant { margin: 54px 0 34px; overflow: hidden; }
+  .giant p {
+    margin: 0;
+    font-family: var(--display);
+    font-stretch: 96%;
+    font-size: clamp(2.3rem, 7.4vw, 5.6rem);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    color: var(--text);
+  }
+  .giant p .em { font-weight: 400; letter-spacing: -0.03em; }
 
   .entrance {
     opacity: 0;
@@ -203,9 +350,9 @@
   }
 
   header.page-header .status-strip.entrance { animation-delay: 0s; }
-  header.page-header h1.entrance { animation-delay: 0.08s; }
-  header.page-header p.entrance:nth-of-type(1) { animation-delay: 0.16s; }
-  header.page-header p.entrance:nth-of-type(2) { animation-delay: 0.24s; }
+  header.page-header .lead.entrance { animation-delay: 0.55s; }
+  header.page-header .stats.entrance { animation-delay: 0.68s; }
+  header.page-header .topo.entrance { animation-delay: 0.8s; }
 
   @keyframes entranceRise {
     from { opacity: 0; transform: translateY(14px); }
@@ -215,7 +362,8 @@
   /* ---------- Typography ---------- */
 
   h3 {
-    font-size: 1.05em;
+    font-family: var(--display);
+    font-size: 1.12em;
     font-weight: 650;
     margin: 26px 0 10px;
     letter-spacing: -0.01em;
@@ -760,6 +908,9 @@
 
   @media (max-width: 760px) {
     .status-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats > div:nth-child(3) { padding-left: 0; border-left: none; }
+    .stats > div:nth-child(n+3) { border-top: 1px solid var(--border); }
   }
 
   @media (max-width: 600px) {
@@ -771,7 +922,8 @@
   @media (max-width: 480px) {
     body { font-size: 15px; }
     main { padding: 20px 12px 60px; }
-    h1 { font-size: 1.6rem; }
+    h1 { font-size: 2.5rem; }
+    .topo .tail { display: none; }
     .panel-header { padding: 11px 16px; }
     .panel-body { padding: 16px 14px 18px; }
     .feature-panel .feature-header { padding: 12px 16px; }
@@ -793,6 +945,11 @@
       opacity: 1 !important;
       transform: none !important;
     }
+
+    h1 .w > span { transform: none !important; animation: none !important; }
+    .topo .pk { display: none; }
+    .topo .nled { animation: none !important; }
+    .note svg path { stroke-dashoffset: 0 !important; }
 
     /* The global rule above collapses animation duration, which would freeze
        the LEDs at whatever opacity the single iteration lands on. Pin them
@@ -830,22 +987,64 @@
 <main>
 
   <header class="page-header">
-    <div class="status-strip entrance"><span class="dot" aria-hidden="true"></span></div>
-    <h1 class="entrance">Homelab</h1>
-    <p class="entrance">
-      A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
-      7050 Micro holding every piece of state, a Raspberry Pi as the independent
-      alerting node and front door, and a dual-GPU Threadripper serving a local 35B
-      model and a contained AI agent. All inter-node traffic runs over Tailscale; nothing is exposed to the LAN or the
-      public internet.
+    <div class="status-strip entrance"><span class="dot" aria-hidden="true"></span><span class="strip-text">Homelab · built in public · updated Oct 2026</span></div>
+    <h1 aria-label="Three nodes. Built to fail gracefully.">
+      <span class="w" style="--i:0" aria-hidden="true"><span>Three</span></span>
+      <span class="w" style="--i:1" aria-hidden="true"><span>nodes.</span></span>
+      <br>
+      <span class="w muted" style="--i:2" aria-hidden="true"><span>Built</span></span>
+      <span class="w muted" style="--i:3" aria-hidden="true"><span>to</span></span>
+      <span class="w muted" style="--i:4" aria-hidden="true"><span>fail</span></span>
+      <span class="w em" style="--i:5" aria-hidden="true"><span>gracefully.</span></span>
+    </h1>
+    <p class="lead entrance">
+      My homelab, run like production. An OptiPlex holds every byte of state, a
+      Raspberry Pi watches it, and a dual-GPU Threadripper runs a 35B model on local
+      hardware. Nothing is open to the internet, and every decision is written down,
+      including the ones that turned out wrong.
     </p>
-    <p class="entrance">
-      The point of the project is not the hardware. It is that every node is assigned
-      work it is actually suited to, every container is capacity-bounded, nothing that
-      matters depends on the least reliable thing it touches, and the monitoring is
-      designed around the assumption that any given node will fail — including the
-      node doing the monitoring.
-    </p>
+
+    <dl class="stats entrance">
+      <div><dt>3</dt><dd>nodes, each trusted with one kind of work</dd></div>
+      <div><dt>0</dt><dd>ports open to the internet</dd></div>
+      <div><dt>35B</dt><dd>parameter model on local GPUs</dd></div>
+      <div><dt>1s</dt><dd>camera clip to plain-English sentence</dd></div>
+    </dl>
+
+    <figure class="topo entrance" aria-label="Diagram: sentinel health-checks forge and synapse; forge sends camera clips to synapse and gets descriptions back. All links run over Tailscale.">
+      <svg viewBox="0 46 520 156" role="img" aria-hidden="true">
+        <!-- Links. Path ids are what the packets ride along. -->
+        <path id="l-sf" class="link" d="M130 132 L195 132" />
+        <path id="l-fs" class="link" d="M325 122 C 352 98, 363 98, 390 122" />
+        <path id="l-sf2" class="link" d="M390 142 C 363 166, 352 166, 325 142" />
+        <path id="l-ss" class="link link-faint" d="M65 100 C 160 38, 360 38, 455 100" />
+
+        <!-- Packets: health checks (cyan), clip out (lime), description back (magenta). -->
+        <circle class="pk pk-hc" r="4.5"><animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#l-sf" /></animateMotion></circle>
+        <circle class="pk pk-hc" r="4.5"><animateMotion dur="3.6s" begin="0.8s" repeatCount="indefinite"><mpath href="#l-ss" /></animateMotion></circle>
+        <circle class="pk pk-clip" r="5.5"><animateMotion dur="2.4s" begin="0.4s" repeatCount="indefinite"><mpath href="#l-fs" /></animateMotion></circle>
+        <circle class="pk pk-ai" r="5.5"><animateMotion dur="2.4s" begin="1.6s" repeatCount="indefinite"><mpath href="#l-sf2" /></animateMotion></circle>
+
+        <g class="node n-sentinel" transform="translate(0 100)">
+          <rect width="130" height="64" rx="3" /><circle class="nled" cx="14" cy="18" r="5" />
+          <text x="26" y="25" class="nname">sentinel</text><text x="12" y="50" class="nrole">alerts</text>
+        </g>
+        <g class="node n-forge" transform="translate(195 100)">
+          <rect width="130" height="64" rx="3" /><circle class="nled" cx="14" cy="18" r="5" />
+          <text x="26" y="25" class="nname">forge</text><text x="12" y="50" class="nrole">all the state</text>
+        </g>
+        <g class="node n-synapse" transform="translate(390 100)">
+          <rect width="130" height="64" rx="3" /><circle class="nled" cx="14" cy="18" r="5" />
+          <text x="26" y="25" class="nname">synapse</text><text x="12" y="50" class="nrole">GPUs · agent</text>
+        </g>
+        <text x="260" y="196" class="tail">all links: Tailscale · nothing faces the internet</text>
+      </svg>
+      <figcaption class="legend">
+        <span><i class="k k-hc"></i>health check</span>
+        <span><i class="k k-clip"></i>camera clip</span>
+        <span><i class="k k-ai"></i>AI description</span>
+      </figcaption>
+    </figure>
   </header>
 
   <section id="architecture" class="reveal panel">
@@ -1022,6 +1221,7 @@
           <figcaption><span class="shot-step">5 · 35B on synapse, whole clip as video</span>One push-notification sentence in <strong>1s</strong>.</figcaption>
         </figure>
       </div>
+      <p class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>222 seconds down to one.</p>
       <p class="reveal-child shots-note">
         Faces, camera names and the exterior view are obscured. The captions are what matter.
       </p>
@@ -1328,6 +1528,7 @@
         rows for its entire life while the built-in system quietly did the work. The ADR
         exists so the reversal is recorded rather than rediscovered.
       </p>
+      <p class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>zero rows. the whole time.</p>
       <p class="reveal-child">
         <strong>ADR-0005 — split runtimes by trust zone, then collapse back to one.</strong> A research
         runtime and an execution runtime, separated by a human-moved file. Once the local
@@ -1342,6 +1543,7 @@
         a legitimate decision — but the rule is not allowed to be quietly treated as though it
         passed.
       </p>
+      <p class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>yes, I know.</p>
       <p class="reveal-child">
         <strong>The camera pipeline puts ingest on forge and AI on synapse.</strong> Clips are state, and
         state lives on forge's NVMe, not the Pi's microSD. Descriptions are enrichment, so they
@@ -1362,7 +1564,7 @@
           with a boot-time healer that recreates only containers whose bindings are configured
           but not live. A no-op on a clean boot. It found one more problem on the way: a
           container started by hand, with no compose metadata, could not be recreated at all —
-          so it became a compose stack too.</li>
+          so it became a compose stack too.<span class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>every light red, every service fine</span></li>
         <li class="reveal-child"><strong>Built the GPU node and moved inference onto it.</strong> A dual-GPU Threadripper
           now serves the agent's model locally, on a node that is always on by design, with
           hosted APIs no longer part of the steady state.</li>
@@ -1437,6 +1639,10 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="giant reveal" aria-label="Write it down. Especially when it's wrong.">
+    <p aria-hidden="true">Write it down.<br><span class="em">Especially when it&rsquo;s wrong.</span></p>
   </section>
 
   <section id="note-on-scope" class="reveal panel">
