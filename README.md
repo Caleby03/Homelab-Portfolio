@@ -100,7 +100,7 @@ notification like "Delivery driver leaves a package at the front door."
   roughly the same VRAM), and the first real clip was described in **2.6
   seconds**.
 
-The same Discord channel across all four stages, cropped, with faces and the
+The same Discord channel across all four stages, cropped, with faces, camera names and the
 exterior view pixelated. Each reply's footer gives the model, frames and time.
 
 | 1 · Raw clip | 2 · YOLO26n on CPU — 2.0s | 3 · 2B VLM on CPU — 222s | 4 · 0.8B, chained — 39s | 5 · 35B on synapse — 1s |
