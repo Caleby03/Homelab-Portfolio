@@ -1,250 +1,299 @@
 # Homelab
 
-A three-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
-7050 Micro hosting the stateful container stack, a Windows gaming desktop
-(Ryzen 7 3700X, RTX 2070 Super 8GB, 64GB RAM) used as burst GPU capacity, and a
-Raspberry Pi as an independent watchdog. All inter-node traffic runs over
-Tailscale; nothing is exposed to the LAN or the public internet.
+A four-node homelab run as infrastructure-as-config: an always-on Dell OptiPlex
+7050 Micro holding every piece of state, a Raspberry Pi as the independent
+alerting node and front door, a dual-GPU Threadripper serving a local 35B model
+and a contained AI agent, and a Windows gaming desktop that is allowed to
+vanish. All inter-node traffic runs over Tailscale; nothing is exposed to the
+LAN or the public internet.
 
 The point of the project is not the hardware. It is that every node is assigned
-work it is actually suited to, every container is capacity-bounded, and the
-monitoring is designed around the assumption that any given node will fail —
-including the node doing the monitoring.
+work it is actually suited to, every container is capacity-bounded, nothing that
+matters depends on the least reliable thing it touches, and the monitoring is
+designed around the assumption that any given node will fail — including the
+node doing the monitoring.
 
 ---
 
 ## Architecture
 
-|  | Pi (Node C) | OptiPlex (Node B) | Desktop (Node A) |
-|---|---|---|---|
-| **Defining trait** | ~5W, never off | i7, 16GB, always on | 8GB VRAM, 64GB RAM, **unreliable** |
-| **Failure mode** | SD card death | OOM, disk fill | You start a game |
-| **Good at** | Watchdog, DNS | Stateful services | Burst compute |
-| **Bad at** | Anything heavy | Sustained CPU/GPU | Being available |
+|  | sentinel — Pi | forge — OptiPlex | synapse — Threadripper | desktop |
+|---|---|---|---|---|
+| **Hardware** | Raspberry Pi, microSD | i7-7700T (35W), 16GB, NVMe | 9960X, 2× RTX 5070 Ti 16GB, 32GB | 3700X, RTX 2070S, 64GB, Win 11 |
+| **Job** | Alerting, front door | All state, metrics | Inference, agent | Gaming |
+| **Failure mode** | SD card death | OOM, disk fill | GPUs on another job | You start a game |
+| **Trusted with** | Saying something is wrong | Anything that must survive a reboot | Work that can be skipped | Nothing |
 
 ### Why the work is split this way
 
-**The desktop is unreliable by design.** It is a gaming machine first, so it
-disappears without warning. That is treated as an input, not a defect: nothing
-stateful is placed on it, it owns no queue, and no alert fires when it vanishes.
-Alerting on a node that is *expected* to go offline just trains alert-blindness.
-What it is genuinely good at is burst GPU work, so that is all it gets —
-inference and headless browser workers, both of which can fail and be retried.
+**forge holds anything that must survive a reboot.** Databases, the queue
+broker, bookkeeping, metrics history and the camera archive. It is the box with
+the real availability guarantee and fast local storage, so it is the only node
+trusted with state.
 
-**The OptiPlex holds anything that must survive a reboot.** Databases, the queue
-broker, dashboards, bookkeeping. It is the only node with a real availability
-guarantee, so it is the only node trusted with state.
+**sentinel exists to watch the others.** ~5W, separate power, separate storage,
+separate failure modes — so when forge falls over, the thing that says so is
+not part of the outage (ADR-0001). The service dashboard lives here too: a
+front door that dies with the box it points at is not useful.
 
-**Headless browser work runs on the desktop, orchestrated from the OptiPlex.**
-Each Chromium worker costs 300–500MB. Running a scraping pipeline on a 16GB box
-alongside the databases would flatten it. Splitting orchestration from execution
-means the small always-on node keeps the queue and the state, while the big
-unreliable node does the expensive, interruptible part.
+**synapse does the GPU work, and nothing critical waits on it.** It serves the
+agent's model and enriches other pipelines, but it is treated as optional: it
+gets torn down for benchmarking, and its GPUs get lent to other projects. Every
+consumer is built so that synapse being down costs a feature, never an alert.
 
-**The Pi exists to watch the others.** ~5W, separate power draw, separate
-storage, separate failure modes — see ADR-0001.
+**The desktop is unreliable by design, and has been written out of the critical
+path.** It used to be the burst-inference host; that job moved to synapse,
+which is always-on by design. It still reports metrics and deliberately never
+alerts — alerting on a node *expected* to go offline trains alert-blindness.
 
 ---
 
 ## What is running
 
-Containerized on the always-on node, managed through Portainer:
+| Node | Role | Component |
+|---|---|---|
+| sentinel | Uptime monitoring and alerting | Uptime Kuma |
+| sentinel | Service dashboard (sees all nodes) | Homepage |
+| forge | Metrics and dashboards | Prometheus, Grafana, node-exporter, cAdvisor |
+| forge | Relational database, queue broker | PostgreSQL with pgAdmin, Redis |
+| forge | Double-entry bookkeeping | Manager.io |
+| forge | Camera ingest, archive, alerts | blink-watch + detector (custom) |
+| forge | Boot-time self-repair | docker-port-healer (systemd) |
+| synapse | Local inference | vLLM — Qwen3.6-35B-A3B, NVFP4, 2-GPU |
+| synapse | AI agent (Discord) | Hermes Agent |
+| synapse | Agent egress allowlist, search | Squid, SearXNG |
+| forge, synapse | Read-only Docker API for the dashboard | docker-socket-proxy |
+| desktop | Host and GPU metrics | windows_exporter, GPU exporter |
 
-| Role | Component |
+Each node runs its own Portainer; services address each other by Tailscale name.
+
+---
+
+## Project — Blink smart alerts
+
+Blink's cameras record to a USB drive on the Sync Module for free, but anything
+smarter than "motion happened" sits behind a subscription. This pipeline pulls
+each clip off the module, archives it on forge, alerts on Discord, and then has
+the local model on synapse describe what is in it — a one-line push
+notification like "Delivery driver leaves a package at the front door."
+
+### How a clip moves
+
+1. **Ingest on forge.** A watcher polls the Sync Module's local-storage manifest
+   through `blinkpy`, downloads each new clip, and files it as camera / date /
+   time with a JSON sidecar recording every timing.
+2. **Alert immediately.** The raw clip is posted to Discord the moment it lands.
+   **The alert never waits on AI** — that is the one hard constraint.
+3. **Describe in the background.** A detector service re-encodes the clip small
+   (2 fps, 640px, no audio — bounds tokens per clip and drops a broken first
+   packet Blink writes) and sends the whole clip, as video, to vLLM on synapse.
+4. **Follow up.** The one-sentence description posts as a reply under the alert
+   and is written into the sidecar. If synapse is down, the clip still saves and
+   still alerts — it just gets no description. No fallback, by choice.
+
+### How it got there — three designs in two days
+
+- **Object detection first.** YOLO26n through ONNX Runtime on two of forge's CPU
+  threads, posting a copy of the clip with boxes drawn. It proved the plumbing,
+  but a boxed video on a phone answers nothing a sentence does not answer faster.
+- **Then small vision models on forge's CPU.** 0.8B–2B VLMs, single frames, then
+  three frames chained with notes carried between them. Accurate enough, but
+  40–220 seconds per clip on a 35W quad-core.
+- **Then the cheapest option, checked last when it should have been first:** the
+  35B model synapse already serves for the agent accepts video natively; vision
+  had simply been switched off at launch. Turning it on cost nothing measurable
+  (agent throughput 238 vs 240 tok/s, same reasoning and retrieval scores,
+  roughly the same VRAM), and the first real clip was described in **2.6
+  seconds**.
+
+### Bugs worth keeping
+
+- **Blink lies about frame rate.** Frame-index arithmetic put second 3 of a
+  10-second clip past the end of the file. Frames are now picked by real
+  presentation timestamp.
+- **New cameras were silently dropped.** The library learns camera names once at
+  startup. Unknown cameras are now accepted and trigger a re-read of the camera
+  list from the cloud.
+- **Renaming a camera re-posted its entire history.** Seen-clip keys included the
+  camera name; they now key on recording time, and anything older than an hour
+  is marked seen rather than posted.
+- **Polling made the app say "system busy".** Every manifest poll is a command
+  the Sync Module must process. A 48-hour probe logged every read-only cloud
+  endpoint on change and scored each field's precision and recall against real
+  clips, to find a cloud-side motion signal that can gate the poll. Choosing the
+  trigger from that data is the open step.
+- **A login storm.** A fatal error under `restart: unless-stopped` re-logged into
+  Blink every second. Fatal paths now back off ten minutes before exiting.
+
+### Tradeoffs, stated plainly
+
+Latency is minutes, not seconds. Clips transit Blink's cloud on the way down, so
+this is not fully local. The API is unofficial and one read uses a private
+library attribute, so the library is pinned to a known commit. The YOLO stack is
+AGPL. The archive is a single copy with no retention policy yet.
+
+| Stage | State |
 |---|---|
-| Container management | Portainer |
-| Uptime monitoring and alerting | Uptime Kuma |
-| Service dashboard | Homepage |
-| Relational database | PostgreSQL, with pgAdmin |
-| Queue broker | Redis |
-| Double-entry bookkeeping | Manager.io |
+| Clip ingest, archive, Discord alert | Running |
+| Descriptions from synapse's vLLM | Running |
+| Cloud-side motion trigger to replace polling | Analysing probe |
+| Filter alerts (e.g. people only) | After a trust period |
+| Archive to a NAS | When the NAS exists |
+| Home Assistant reading the same archive | Later |
 
-Metrics collection and time-series dashboards (Prometheus, Grafana, cAdvisor and
-the host/GPU exporters) are deployed but not yet configured — see Build status.
+---
+
+## Local AI — synapse
+
+A fully local agent on a fully local model, reachable over Discord, with web
+search and no paid APIs in the steady state.
+
+- **Inference:** vLLM serving Qwen3.6-35B-A3B at NVFP4, tensor-parallel across
+  both 16GB cards, 262K context, vision enabled. Chosen over a dense 27B after a
+  benchmark tied them on reasoning and tool use at 238 vs ~102 tok/s and 262K vs
+  ~88K context.
+- **Tuned from failures, not defaults.** The speculative-decoding draft head
+  OOM-crashed vLLM twice, so it is off. Automatic KV-cache sizing left ~76MB free
+  per card, so the cache is a fixed size with real headroom. Prefix caching
+  caused long-prompt hangs on this hybrid architecture, so it is off.
+- **Agent:** Hermes Agent in a container — non-root, no Docker socket,
+  `no-new-privileges`, 4GB and 512-PID limits. Only allowlisted Discord users can
+  command it, and memory or skill writes need explicit approval.
+
+### Containment is the network, not the tooling
+
+The agent sits on a Docker network created `--internal`: no gateway, no NAT, no
+route off the box. Squid and SearXNG are the only containers on both that
+network and an uplink, so they are the only exits, and Squid allows HTTPS to
+Discord and five exact GitHub hosts — nothing else. Dropping a proxy setting
+costs the agent its egress instead of granting it free egress. The dashboard's
+read-only Docker API is deliberately off the agent's network, verified
+unreachable three ways.
+
+**Residual risks:** the Discord token is readable inside the agent's container;
+the shell tool can write anywhere in the container, so the container is the
+sandbox; fetched URLs and search queries are small exfiltration channels; and
+the model API is open to every tailnet device without a key.
+
+**Next phase, not running yet:** Hermes takes a scoped task, works on a branch
+and opens a pull request — never pushing to `main` — and Claude Code reviews it.
+Waiting on a fine-grained token limited to selected repositories.
 
 ---
 
 ## Operational practice
 
-Conventions applied across every compose file in the private config repo:
-
-- **Every container has a `mem_limit`.** A 16GB host with unbounded containers
-  is an OOM waiting to happen. The monitoring stack is capped at ~1.1GB total,
-  sized deliberately so it fits alongside the services it observes.
-- **Image tags are pinned to explicit versions**, never `latest`. A rebuild
-  reproduces the same stack rather than silently pulling a new major version.
-- **Config is bind-mounted, state lives in named volumes.** Config is in git;
-  state deliberately is not. The repo plus a Tailscale login is the rebuild path.
-- **Reachability is a firewall property, not a bind-address property.** Docker
-  continues to listen on all interfaces so containers can reach one another and
-  the host; the packet filter is what decides who gets through. See Network
-  security model.
-- **Services address each other by Tailscale MagicDNS name, not IP.** This is
-  what makes a service portable between nodes: moving it becomes a volume copy
-  rather than a config rewrite. The one exception is Docker port bindings, which
-  require a literal address at bind time.
+- **Every container has a `mem_limit`.** The camera detector is additionally
+  capped at two CPU threads so a burst of clips cannot starve the databases.
+- **Versions are pinned where a rebuild depends on them** — the inference
+  server, the metrics stack, the egress proxy, the camera library. Several web
+  front-ends and the agent image still track `latest`; a known gap, not a policy.
+- **Config is bind-mounted, state lives in named volumes.** The repo plus a
+  Tailscale login is the rebuild path.
+- **Reachability is a firewall property, not a bind-address property.**
+- **Services address each other by Tailscale MagicDNS name, not IP**, with names
+  set explicitly at join time so they cannot silently drift from the configs.
 - **Secrets never reach the repository.** `.env` is gitignored, `.env.example`
-  documents every variable with placeholder values, and `gitleaks` runs against
-  staged changes before every push.
+  documents every variable, and `gitleaks` runs before every push.
+- **Agents propose, a human executes.** Destructive commands and deployments
+  stay human-gated.
 
 ---
 
 ## Network security model
 
-The design goal is that nothing is reachable without authenticating first, and
-that being on the same physical network grants nothing at all.
-
-- **Tailscale is the only transport between nodes.** A WireGuard-based mesh
-  carries all inter-node traffic. There is no port forwarding on the router, no
-  reverse proxy exposed to the internet, and no public ingress of any kind.
-- **Access is authenticated per device, not per network.** A machine reaches
-  services because it has authenticated onto the tailnet — not because it
-  happens to sit on the right LAN. Revoking a device removes its access
-  everywhere at once, rather than requiring a firewall change.
-- **The firewall is the enforcement boundary.** Docker deliberately still
-  listens on all interfaces, so containers and the host can talk to each other
-  without special-casing every service. External traffic is filtered in the
-  `DOCKER-USER` chain — evaluated ahead of Docker's own accept rules — so only
-  packets arriving over the Tailscale interface reach a published port. Host
-  SSH is restricted to the same interface via UFW.
-- **The desktop is firewalled to the tailnet range** for the exporter ports it
-  publishes, so an exporter cannot be scraped from anywhere else.
-- **Secrets stay out of version control.** `.env` is gitignored, `.env.example`
-  documents every required variable with placeholder values, and `gitleaks` is
-  run against staged changes before every push.
+- **Tailscale is the only transport between nodes.** No port forwarding, no
+  public reverse proxy, no public ingress. The camera pipeline is outbound-only.
+- **Access is authenticated per device, not per network.**
+- **The firewall is the enforcement boundary.** `DOCKER-USER` rules admit only
+  traffic arriving over the Tailscale interface; host SSH is restricted the same
+  way via UFW.
+- **The dashboard never gets a raw Docker socket** — only a read-only proxy.
+- **The agent is contained by topology** — see Local AI above.
 
 ### Closing a real gap: Docker's firewall bypass
 
-The tailnet-only property was originally enforced by convention — every
-published port was expected to carry an explicit bind address. Auditing it
-showed that convention was not holding, and published container ports were
-reachable from the LAN.
+Auditing the tailnet-only property showed published container ports were
+reachable from the LAN. Publishing a port inserts iptables rules evaluated
+*before* the chain UFW manages, so UFW reports the host as locked down while
+Docker has already accepted the traffic — a system that reports itself as closed
+while it is open. The fix moved enforcement into the `DOCKER-USER` chain. The
+tradeoff: enforcement is now a single control rather than layered, so the
+firewall rules are load-bearing. Recorded as ADR-0002, with a runbook whose
+verification must be run from a LAN host that is not on the tailnet.
 
-The cause is a well-known and easily-missed Docker behaviour: publishing a port
-inserts iptables rules that are evaluated *before* the chain UFW manages. A
-`deny incoming` default policy therefore does not block a published container
-port. UFW reports the host as locked down while Docker has already accepted the
-traffic.
-
-That is the worst class of security bug in a homelab — not an open port, but a
-system that reports itself as closed while it is open, so everything built on
-top of it inherits a false assumption. The fix was to stop treating bind
-addresses as a security control and put enforcement in the packet filter
-instead: rules in the `DOCKER-USER` chain, which is evaluated ahead of Docker's
-own accept rules, admit only traffic arriving over the Tailscale interface.
-Host SSH was locked to that same interface with UFW. Containers still listen
-broadly so they can reach one another and the host — reachability is decided at
-the filter, not at the socket.
-
-The tradeoff is deliberate and worth stating: enforcement is now a single
-control rather than layered. Because the listening sockets remain open on all
-interfaces, the firewall rules are load-bearing, which makes their persistence
-across reboots and Docker restarts a first-class operational concern rather
-than a detail.
-
-Recorded as ADR-0002, with a runbook covering verification — which has to be
-done from a LAN host that is not on the tailnet, since checking from the host
-itself passes trivially and proves nothing.
-
-
-Planned hardening: single sign-on in front of the web interfaces, tailnet ACLs
-restricting which node may reach which service, and network isolation for agent
-runtimes so a runtime cannot reach the rest of the stack.
+Planned hardening: single sign-on and tailnet ACLs — which would also close the
+keyless model API.
 
 ---
 
 ## Architecture decisions
 
-Decisions are recorded as ADRs at the time they are made, rather than
-reconstructed afterwards. The configs show *what* runs; the ADRs record *why*.
+ADRs are written when the decision is made, and amended or superseded in place
+when they stop being true.
 
-**ADR-0001 — monitoring moved off the box it monitors.** Uptime Kuma was
-originally installed on the OptiPlex, simply because that is where everything
-else already lived. That made the OptiPlex a single point of failure for knowing
-whether the OptiPlex was up: if it OOMs, fills its disk, or reboots for updates,
-monitoring stops at the same instant the thing being monitored stops — and the
-failure is silent, because the alerting is part of the outage. Alerting must not
-share a failure domain with the thing it watches. Uptime Kuma therefore moves to
-the Pi: an independent observer with its own power, storage and failure modes.
-
-Prometheus, Grafana and Homepage deliberately stay on the OptiPlex. They serve a
-different purpose — diagnosis after the fact, not notification in the moment.
-Only the second needs to survive the outage. A dashboard being unreachable
-during an outage is accepted: during an outage there is nothing to look at.
-
-**Alerting deliberately excludes the desktop.** Alerting on a node expected to
-disappear produces noise, and noise produces ignored alerts.
-
-**A dedicated local AI node is deferred, with a defined trigger.** The hybrid
-local + hosted inference routing already covers the work the 2070 Super cannot.
-A dedicated GPU build is deferred until a specific spend threshold is crossed,
-rather than bought speculatively — the discipline being that hardware must fix a
-fault that exists now, or remove a ceiling actually being hit.
+- **ADR-0001 — alerting must not share a failure domain with what it watches.**
+  Uptime Kuma moved to the Pi. Prometheus and Grafana went there briefly and came
+  back: the argument was always about notification, not diagnosis.
+- **ADR-0002 — reachability is enforced in the firewall.**
+- **ADR-0003 — contain an agent at the network layer.** Written for an earlier
+  runtime and superseded, but its reasoning is exactly what synapse runs today.
+- **ADR-0004 — built-in agent memory over a vector database.** The plan's premise
+  was wrong on every point; the vector store held zero rows for its entire life
+  while the built-in hybrid search did the work.
+- **ADR-0005 — split runtimes by trust zone, then collapse back to one.** Amended
+  when the second runtime proved redundant, including the parts of its security
+  section that were never built.
+- **Building synapse was not justified by the spend rule, and that is written
+  down** rather than treated as though the rule passed.
+- **The camera pipeline puts ingest on forge and AI on synapse.** Clips are state;
+  descriptions are enrichment.
 
 ---
 
-## Migrations
+## Migrations and incidents
 
-- **Uptime Kuma → Pi.** Planned move off the monitored host, per ADR-0001.
-  Deliberately built on the OptiPlex first: the rebuild is cheap, doing it twice
-  is useful practice, and because every monitor targets a MagicDNS name rather
-  than an IP, the second pass is a volume copy rather than a rewrite.
-- **OptiPlex board replacement and 8→16GB RAM upgrade.** Fixed a real fault and
-  lifted a ceiling that was actually being hit, which is what justified it.
-- **Docker firewall lockdown.** Audited the tailnet-only invariant, found
-  published container ports reachable from the LAN because Docker bypasses UFW,
-  and moved enforcement into the `DOCKER-USER` chain with SSH restricted via
-  UFW. See ADR-0002.
-- **Monitoring stack rollout.** Prometheus recording rules pre-compute the
-  values the dashboard displays, because the dashboard widget passes PromQL in a
-  URL query string and long expressions become an encoding problem. Collapsing
-  each to a single short metric name keeps the dashboard config readable.
-
----
-
-## Planned — agent orchestration
-
-**Nothing in this section is running today.** It is the next phase of the build,
-recorded here as direction rather than achievement.
-
-The intent is a managed cluster of AI agents handling day-to-day operational
-work — monitoring triage, routine maintenance, bookkeeping and document intake —
-orchestrated from the always-on node, with GPU-heavy steps dispatched to the
-desktop and hosted models used where local capacity falls short.
-
-The placement logic is the same as everywhere else in this homelab: orchestration
-and state on the reliable node, expensive interruptible compute on the unreliable
-one. Agent runtimes are intended to be network-isolated from the rest of the
-stack, so that a compromised or misbehaving runtime cannot reach the databases or
-the queue broker.
+- **A power surge broke every published port — the services were fine.** After
+  an unclean shutdown, containers restored with correct port config but no live
+  mappings. Docker's network state is not crash-safe, and only recreating the
+  container rebuilds it. Fixed with a boot-time healer that recreates only
+  containers whose bindings are configured but not live — a no-op on a clean
+  boot.
+- **Built the GPU node and moved inference onto it**, dissolving the "agent
+  fallback when the desktop is offline" problem.
+- **Agent runtime, three reversals**, ending at one local agent on synapse; the
+  removed runtime's config was deleted rather than left behind.
+- **Uptime Kuma and Homepage → Pi**, per ADR-0001 — a volume copy, not a rewrite.
+- **Docker firewall lockdown** (ADR-0002).
+- **Removed a container that did nothing** — a worker tailing `/dev/null`
+  against a directory that never existed in git.
+- **OptiPlex board replacement and 8→16GB RAM upgrade.**
+- **Monitoring rollout** with Prometheus recording rules sized for the
+  dashboard's URL-encoded queries.
 
 ---
 
 ## Build status
 
-Built in public. This is a live project, so the page separates what runs today
-from what is next — nothing below is listed as running unless it is.
+**Running now.** Four-node split with workloads placed by node reliability.
+Tailscale-only mesh enforced in the firewall. Independent alerting and dashboard
+on the Pi. Stateful stack, metrics and bookkeeping on forge with boot-time port
+self-repair. Local 35B inference and a network-contained agent on synapse. Blink
+camera alerts with AI descriptions. ADR practice and secret scanning on every
+push.
 
-**Running now.** Three-node role split with workloads placed by node
-reliability. Tailscale-only mesh with no public ingress and no LAN exposure, enforced in the
-firewall after an audit found Docker bypassing UFW (ADR-0002).
-Containerized always-on stack — container management, uptime monitoring and
-alerting, service dashboard, relational database, queue broker and bookkeeping —
-every container under an explicit memory limit and a pinned image tag. Hybrid
-local + hosted inference routing. Infrastructure-as-config repository with ADR
-practice and secret scanning on every push.
+**In progress.** Choosing a cloud-side motion trigger from the 48-hour probe
+data. Agent-opens-PR, Claude-reviews workflow. Pinning the images that still
+track `latest`.
 
-**In progress.** Metrics collection and time-series dashboards, deployed but not
-yet configured. Host and GPU exporters. API spend dashboard widget.
-
-**Next.** Raspberry Pi watchdog node, and with it the ADR-0001 migration of
-uptime monitoring off the host it monitors. DNS filtering. Workflow
-orchestration and document management. Single sign-on and tailnet ACLs. The
-agent orchestration cluster described above.
+**Next.** **Data backups** — the largest unaddressed risk; designed as
+peer-to-peer nightly snapshots with quarterly restore tests. Then DNS filtering,
+single sign-on and tailnet ACLs, people-only camera alerts, and a NAS.
 
 ---
 
 ## Note on scope
 
-This is the public view. The configuration itself, runbooks, network addressing,
-port bindings and firewall rules live in a separate private repository.
+This is the public view. The configuration itself, runbooks, network
+addressing, port bindings and firewall rules live in a separate private
+repository.
