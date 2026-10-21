@@ -538,6 +538,54 @@
 
   td.wrap { white-space: normal; min-width: 220px; }
 
+  /* ---------- Screenshot strip (Blink progression) ---------- */
+
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 0 0 10px;
+    align-items: start;
+  }
+
+  .shots figure {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--lime-border);
+    background: var(--panel-bg-nested);
+  }
+
+  /* The last frame is the result, so it gets the stronger rail. */
+  .shots figure:last-child { border-color: var(--lime-border); border-top-color: var(--lime); }
+
+  .shots img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #1a1a1e;
+  }
+
+  .shots figcaption {
+    padding: 9px 11px 11px;
+    font-size: 0.84em;
+    line-height: 1.45;
+    color: var(--text-dim);
+  }
+
+  .shots .shot-step {
+    display: block;
+    margin-bottom: 3px;
+    font-family: var(--mono);
+    font-size: 0.82em;
+    letter-spacing: 0.04em;
+    color: var(--lime-label);
+  }
+
+  .shots-note {
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
   /* ---------- Callout ---------- */
 
   .callout {
@@ -945,7 +993,7 @@
       <p class="reveal-child">
         <strong>Then small vision models on forge's CPU.</strong> 0.8B–2B VLMs, single frames, then
         three frames chained with notes carried between them. Accurate enough, but
-        40–220 seconds per clip on a 35W quad-core — a description that arrives four
+        39–224 seconds per clip on a 35W quad-core — a description that arrives four
         minutes after the alert is history, not a notification.
       </p>
       <p class="reveal-child">
@@ -955,6 +1003,41 @@
         throughput 238 vs 240 tok/s, the same reasoning and retrieval scores, roughly the
         same VRAM — and the first real clip was described in <strong>2.6 seconds</strong>. No
         second model, no extra GPU memory, and the CPU experiments were deleted.
+      </p>
+
+      <p class="reveal-child shots-intro">
+        The same Discord channel across all four stages, unedited apart from cropping. Each
+        reply's own footer is the receipt: model, frames, and how long it took.
+      </p>
+      <div class="shots reveal-child">
+        <figure>
+          <img src="img/blink/1-raw.jpg" width="720" height="480" loading="lazy"
+               alt="Discord alert from the Blink bot: 'Motion — Tilt Medusa Cam', with the raw clip attached.">
+          <figcaption><span class="shot-step">1 · Raw clip</span>Alert with the clip attached. No AI yet.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/2-yolo.jpg" width="720" height="432" loading="lazy"
+               alt="Follow-up reply 'person 0.89 (16/48 frames, 2.0s)' with a bounding box drawn around a person.">
+          <figcaption><span class="shot-step">2 · YOLO26n on CPU</span><strong>2.0s</strong>. Fast and correct, but a box tells you little.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/3-cpu-vlm.jpg" width="720" height="517" loading="lazy"
+               alt="Follow-up reply describing a person on a couch holding a phone, footer '(qwen3-vl:2b, 3 frames, 222s)'.">
+          <figcaption><span class="shot-step">3 · 2B VLM on CPU</span>A real sentence, in <strong>222s</strong>.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/4-chained.jpg" width="720" height="603" loading="lazy"
+               alt="Follow-up reply from qwen3.5:0.8b describing a man on a couch in purple lighting, footer 'frames at 1.47s, 1.93s, 39s'.">
+          <figcaption><span class="shot-step">4 · 0.8B, chained frames</span>Two models side by side. Best case <strong>39s</strong>.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/blink/5-synapse.jpg" width="720" height="603" loading="lazy"
+               alt="Follow-up reply from qwen36-35b@synapse: 'Person walks down the driveway towards the house. (video 2fps/640px, 214KB, 1s)'. The camera frame is pixelated.">
+          <figcaption><span class="shot-step">5 · 35B on synapse, whole clip as video</span>One push-notification sentence in <strong>1s</strong>.</figcaption>
+        </figure>
+      </div>
+      <p class="reveal-child shots-note">
+        Faces and the exterior view are pixelated. The captions are what matter.
       </p>
 
       <h3 class="reveal-child">Bugs worth keeping</h3>

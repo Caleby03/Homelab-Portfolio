@@ -98,13 +98,20 @@ notification like "Delivery driver leaves a package at the front door."
   but a boxed video on a phone answers nothing a sentence does not answer faster.
 - **Then small vision models on forge's CPU.** 0.8B–2B VLMs, single frames, then
   three frames chained with notes carried between them. Accurate enough, but
-  40–220 seconds per clip on a 35W quad-core.
+  39–224 seconds per clip on a 35W quad-core.
 - **Then the cheapest option, checked last when it should have been first:** the
   35B model synapse already serves for the agent accepts video natively; vision
   had simply been switched off at launch. Turning it on cost nothing measurable
   (agent throughput 238 vs 240 tok/s, same reasoning and retrieval scores,
   roughly the same VRAM), and the first real clip was described in **2.6
   seconds**.
+
+The same Discord channel across all four stages, cropped, with faces and the
+exterior view pixelated. Each reply's footer gives the model, frames and time.
+
+| 1 · Raw clip | 2 · YOLO26n on CPU — 2.0s | 3 · 2B VLM on CPU — 222s | 4 · 0.8B, chained — 39s | 5 · 35B on synapse — 1s |
+|---|---|---|---|---|
+| ![Raw clip alert](img/blink/1-raw.jpg) | ![YOLO person 0.89](img/blink/2-yolo.jpg) | ![qwen3-vl:2b, 222s](img/blink/3-cpu-vlm.jpg) | ![qwen3.5:0.8b, 39s](img/blink/4-chained.jpg) | ![qwen36-35b@synapse, 1s](img/blink/5-synapse.jpg) |
 
 ### Bugs worth keeping
 
