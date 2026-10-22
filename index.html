@@ -304,7 +304,7 @@
 
   /* ---------- Margin notes ----------
      A handful of hand-written asides with a drawn arrow, the way you'd mark up
-     your own notes. Rationed: four on the whole page. The arrow draws itself
+     your own notes. Rationed: five on the whole page. The arrow draws itself
      when its panel reveals. */
   .note {
     display: block;
@@ -1556,6 +1556,16 @@
     <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Migrations and incidents</h2></div>
     <div class="panel-body">
       <ul>
+        <li class="reveal-child"><strong>The drive fell asleep and took the filesystem with it.</strong> Every
+          Uptime Kuma monitor pointed at forge went red at once, except one. The NVMe drive's
+          power saving had let it drop into its deepest sleep state, and it came back read-only:
+          any process that touched the disk, to read or to write, failed. The one monitor that
+          stayed green was watching a process that happened to be running entirely from memory,
+          with no disk I/O, so it kept answering while everything around it was down. A power
+          cycle brought the drive back, and a custom rule now keeps it out of that deep sleep
+          state. Two lessons: a green check proves only the path it exercised, and the drive
+          holding all of forge's state is one more argument for the backups that do not exist
+          yet.<span class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>the survivor never touched the disk</span></li>
         <li class="reveal-child"><strong>A power surge broke every published port — the services were fine.</strong> After an
           unclean shutdown, every container on forge restored with correct port config but no
           live port mappings: every monitor red, every service healthy. Docker's network state
