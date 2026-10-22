@@ -328,6 +328,43 @@
   .note svg path + path { transition-delay: 1.1s; transition-duration: 0.3s; }
   .reveal.visible .note svg path { stroke-dashoffset: 0; }
 
+  /* ---------- Terminal capture ----------
+     Real command output pasted as text, not a screenshot, so it stays sharp
+     and searchable. Scrolls sideways inside itself on narrow screens. */
+  .term {
+    margin: 4px 0 22px;
+    border: 1px solid var(--border-strong);
+    border-top: 3px solid var(--magenta-border);
+    background: #0b0d11;
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-header-bg);
+    font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint);
+  }
+  .term-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); }
+  .term-bar span { margin-left: 8px; }
+  .term pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--text-faint);
+  }
+  .term pre b { font-weight: 600; color: var(--magenta-label); }
+  .term pre .prompt { color: var(--magenta); }
+  .term pre:focus-visible { outline: 2px solid var(--magenta-border); outline-offset: -2px; }
+  .term figcaption {
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.88em;
+    color: var(--text-dim);
+  }
+
   /* ---------- Giant closing statement ---------- */
 
   .giant { margin: 54px 0 34px; overflow: hidden; }
@@ -1352,6 +1389,41 @@
           can command it, and memory or skill writes need explicit approval before they
           persist.</li>
       </ul>
+
+      <figure class="term reveal-child">
+        <div class="term-bar"><i></i><i></i><i></i><span>synapse</span></div>
+        <pre tabindex="0" aria-label="nvidia-smi output on synapse"><span class="prompt">$</span> nvidia-smi
+Thu Oct 22 02:41:34 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.91.07              Driver Version: 595.91.07      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5070 Ti     Off |   00000000:81:00.0 Off |                  N/A |
+|  0%   31C    P8              9W /  300W |   <b>15612MiB /  16303MiB</b> |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA GeForce RTX 5070 Ti     Off |   00000000:C1:00.0 Off |                  N/A |
+|  0%   30C    P8              8W /  300W |   <b>15612MiB /  16303MiB</b> |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A          192195      C   <b>VLLM::Worker_TP0</b>                      15602MiB |
+|    1   N/A  N/A          192196      C   <b>VLLM::Worker_TP1</b>                      15602MiB |
++-----------------------------------------------------------------------------------------+</pre>
+        <figcaption>
+          Both cards, captured between requests: vLLM's two tensor-parallel workers hold
+          <strong>15.6 of 16.3GB each</strong>, which is the 95% memory budget it is configured
+          for, reserved up front rather than grown on demand. Idle, each card draws 8–9W.
+        </figcaption>
+      </figure>
 
       <h3 class="reveal-child">Containment is the network, not the tooling</h3>
       <p class="reveal-child">

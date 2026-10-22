@@ -203,6 +203,38 @@ search and no paid APIs in the steady state.
   `no-new-privileges`, 4GB and 512-PID limits. Only allowlisted Discord users can
   command it, and memory or skill writes need explicit approval.
 
+Both cards, captured between requests. vLLM's two tensor-parallel workers hold
+15.6 of 16.3GB each, the 95% budget it is configured for, reserved up front:
+
+```
+$ nvidia-smi
+Thu Oct 22 02:41:34 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.91.07              Driver Version: 595.91.07      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5070 Ti     Off |   00000000:81:00.0 Off |                  N/A |
+|  0%   31C    P8              9W /  300W |   15612MiB /  16303MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA GeForce RTX 5070 Ti     Off |   00000000:C1:00.0 Off |                  N/A |
+|  0%   30C    P8              8W /  300W |   15612MiB /  16303MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A          192195      C   VLLM::Worker_TP0                      15602MiB |
+|    1   N/A  N/A          192196      C   VLLM::Worker_TP1                      15602MiB |
++-----------------------------------------------------------------------------------------+
+```
+
 ### Containment is the network, not the tooling
 
 The agent sits on a Docker network created `--internal`: no gateway, no NAT, no
