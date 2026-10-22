@@ -343,13 +343,18 @@ when they stop being true.
 
 ## Migrations and incidents
 
-- **The drive fell asleep and took the filesystem with it.** Every Uptime Kuma
-  monitor pointed at forge went red at once, except one. The NVMe drive's power
-  saving let it drop into its deepest sleep state, and it came back read-only:
-  anything that touched the disk failed. The one green monitor was watching a
-  process running entirely from memory, with no disk I/O. A power cycle brought
-  the drive back, and a custom rule now keeps it out of that deep sleep state.
-  A green check proves only the path it exercised.
+- **The drive fell asleep and took the filesystem with it.** At 06:27 the forge
+  monitors started going red, six services inside five minutes. The NVMe drive's
+  power saving let it drop into its deepest sleep state, and it came back
+  read-only, so anything that touched the disk failed. Services kept running
+  until they next needed the disk: Grafana held out until 10:23, Manager.io until
+  14:14. One monitor stayed green all day, watching a process running entirely
+  from memory. A power cycle at 21:18 brought the drive back, every monitor was
+  green by 21:21, and a custom rule now keeps the drive out of that sleep state.
+  About fifteen hours. A green check proves only the path it exercised.
+
+  ![Uptime Kuma event log for the NVMe incident](img/nvme-incident-log.jpg)
+
 - **A power surge broke every published port — the services were fine.** After
   an unclean shutdown, containers restored with correct port config but no live
   mappings. Docker's network state is not crash-safe, and only recreating the

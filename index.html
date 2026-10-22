@@ -105,6 +105,8 @@
     --lime-bg: rgba(166, 200, 92, 0.09);
     --lime-label: #cfe59a;
 
+    --fault: #e5534b;
+
     --code-bg: #1a1e26;
     --code-text: #c9beea;
 
@@ -371,6 +373,29 @@
     .rig { grid-template-columns: 1fr; }
     .rig-photo { max-width: 360px; }
   }
+
+  /* ---------- Incident timeline ----------
+     Fault red is its own token: the semantic rose means "planned", so it can't
+     stand in for "down". Recovery uses the panel emerald, not the semantic green. */
+  .incident-fig {
+    margin: 14px 0 6px;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--blue-border);
+    background: var(--panel-bg-nested);
+  }
+  .incident-fig svg { display: block; width: 100%; height: auto; padding: 6px 8px 0; }
+  .incident-fig a { display: block; cursor: zoom-in; border-top: 1px solid var(--border); }
+  .incident-fig img { display: block; width: 100%; height: auto; background: #0e1015; }
+  .incident-fig figcaption { padding: 8px 12px 10px; font-size: 0.84em; color: var(--text-faint); }
+  .tl-axis { stroke: var(--border-strong); stroke-width: 1.5; }
+  .tl-tick { stroke: var(--border-strong); }
+  .tl-hour { font-family: var(--mono); font-size: 12px; fill: var(--text-faint); text-anchor: middle; }
+  .tl-band { fill: var(--fault); opacity: 0.18; }
+  .tl-down { fill: var(--fault); }
+  .tl-up { fill: var(--emerald); }
+  .tl-label { font-family: var(--sans); font-size: 13px; fill: var(--text-dim); }
+  .tl-strong { fill: var(--text); font-weight: 600; }
+  .tl-green { fill: var(--emerald-label); }
 
   /* ---------- Terminal capture ----------
      Real command output pasted as text, not a screenshot, so it stays sharp
@@ -1706,16 +1731,36 @@ Thu Oct 22 02:41:34 2026
     <div class="panel-header"><span class="panel-led" aria-hidden="true"></span><h2>Migrations and incidents</h2></div>
     <div class="panel-body">
       <ul>
-        <li class="reveal-child"><strong>The drive fell asleep and took the filesystem with it.</strong> Every
-          Uptime Kuma monitor pointed at forge went red at once, except one. The NVMe drive's
-          power saving had let it drop into its deepest sleep state, and it came back read-only:
-          any process that touched the disk, to read or to write, failed. The one monitor that
-          stayed green was watching a process that happened to be running entirely from memory,
-          with no disk I/O, so it kept answering while everything around it was down. A power
-          cycle brought the drive back, and a custom rule now keeps it out of that deep sleep
-          state. Two lessons: a green check proves only the path it exercised, and the drive
-          holding all of forge's state is one more argument for the backups that do not exist
-          yet.<span class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>the survivor never touched the disk</span></li>
+        <li class="reveal-child"><strong>The drive fell asleep and took the filesystem with it.</strong> At 06:27
+          the forge monitors started going red: cAdvisor, Redis, the Docker proxy, Portainer, pgAdmin
+          and Prometheus inside five minutes. The NVMe drive's power saving had let it drop into its
+          deepest sleep state, and it came back read-only, so any process that touched the disk, to
+          read or to write, failed. It was not all at once: services kept running until they next
+          needed the disk, so Grafana held out until 10:23 and Manager.io until 14:14. One monitor
+          stayed green all day, watching a process that ran entirely from memory with no disk I/O.
+          A power cycle at 21:18 brought the drive back, every monitor was green by 21:21, and a
+          custom rule now keeps the drive out of that sleep state. About fifteen hours, start to
+          finish. Two lessons: a green check proves only the path it exercised, and the one drive
+          holding all of forge's state is one more argument for the backups that do not exist yet.
+          <figure class="incident-fig">
+          <svg viewBox="0 40 640 112" aria-hidden="true">
+            <rect x="37.5" y="110" width="558.1" height="12" class="tl-band"/>
+            <line x1="20" y1="122" x2="620" y2="122" class="tl-axis"/>
+            <line x1="20.0" y1="122" x2="20.0" y2="128" class="tl-tick"/><text x="20.0" y="144" class="tl-hour">06:00</text><line x1="95.0" y1="122" x2="95.0" y2="128" class="tl-tick"/><text x="95.0" y="144" class="tl-hour">08:00</text><line x1="170.0" y1="122" x2="170.0" y2="128" class="tl-tick"/><text x="170.0" y="144" class="tl-hour">10:00</text><line x1="245.0" y1="122" x2="245.0" y2="128" class="tl-tick"/><text x="245.0" y="144" class="tl-hour">12:00</text><line x1="320.0" y1="122" x2="320.0" y2="128" class="tl-tick"/><text x="320.0" y="144" class="tl-hour">14:00</text><line x1="395.0" y1="122" x2="395.0" y2="128" class="tl-tick"/><text x="395.0" y="144" class="tl-hour">16:00</text><line x1="470.0" y1="122" x2="470.0" y2="128" class="tl-tick"/><text x="470.0" y="144" class="tl-hour">18:00</text><line x1="545.0" y1="122" x2="545.0" y2="128" class="tl-tick"/><text x="545.0" y="144" class="tl-hour">20:00</text><line x1="620.0" y1="122" x2="620.0" y2="128" class="tl-tick"/><text x="620.0" y="144" class="tl-hour">22:00</text>
+            <circle cx="37.5" cy="116" r="3.6" class="tl-down"/><circle cx="37.5" cy="107" r="3.6" class="tl-down"/><circle cx="37.5" cy="98" r="3.6" class="tl-down"/><circle cx="37.5" cy="89" r="3.6" class="tl-down"/><circle cx="37.5" cy="80" r="3.6" class="tl-down"/><circle cx="37.5" cy="71" r="3.6" class="tl-down"/>
+            <circle cx="185.0" cy="116" r="3.6" class="tl-down"/>
+            <circle cx="328.7" cy="116" r="3.6" class="tl-down"/>
+            <circle cx="595.6" cy="116" r="4.5" class="tl-up"/>
+            <text x="47.5" y="58" class="tl-label">06:27 · six services down in five minutes</text>
+            <text x="185.0" y="100" class="tl-label" text-anchor="middle">10:23 Grafana</text>
+            <text x="328.7" y="100" class="tl-label" text-anchor="middle">14:14 Manager.io</text>
+            <text x="595.6" y="62" class="tl-label tl-strong" text-anchor="end">21:18 power cycle</text>
+            <text x="595.6" y="80" class="tl-label tl-green" text-anchor="end">all green by 21:21</text>
+          </svg>
+          <a href="img/nvme-incident-log.jpg" title="Open full size"><img src="img/nvme-incident-log.jpg" width="1005" height="893" loading="lazy"
+               alt="Uptime Kuma event log for 20 October: forge services going down from 06:27 with timeouts and refused connections, Grafana at 10:23, Manager.io at 14:14, then all coming back up between 21:19 and 21:21."></a>
+          <figcaption>The Uptime Kuma event log from that day, newest first. Tailnet addresses blurred.</figcaption>
+          </figure><span class="note"><svg viewBox="0 0 120 70" aria-hidden="true"><path pathLength="1" d="M104 60 C 74 62, 42 46, 30 12" /><path pathLength="1" d="M20 24 L 30 10 L 42 22" /></svg>the survivor never touched the disk</span></li>
         <li class="reveal-child"><strong>A power surge broke every published port — the services were fine.</strong> After an
           unclean shutdown, every container on forge restored with correct port config but no
           live port mappings: every monitor red, every service healthy. Docker's network state
