@@ -328,6 +328,22 @@
   .note svg path + path { transition-delay: 1.1s; transition-duration: 0.3s; }
   .reveal.visible .note svg path { stroke-dashoffset: 0; }
 
+  /* ---------- Wide screenshots (dashboards) ---------- */
+
+  .wide-shot {
+    margin: 18px 0 0;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--emerald-border);
+    background: var(--panel-bg-nested);
+  }
+  .wide-shot a { display: block; cursor: zoom-in; }
+  .wide-shot img { display: block; width: 100%; height: auto; background: #1a1d24; }
+  .wide-shot figcaption { padding: 10px 14px 12px; font-size: 0.88em; line-height: 1.5; color: var(--text-dim); }
+  .wide-shot .shot-step {
+    display: block; margin-bottom: 3px;
+    font-family: var(--mono); font-size: 0.78em; letter-spacing: 0.04em; color: var(--emerald-label);
+  }
+
   /* ---------- Terminal capture ----------
      Real command output pasted as text, not a screenshot, so it stays sharp
      and searchable. Scrolls sideways inside itself on narrow screens. */
@@ -1176,6 +1192,30 @@
           </tbody>
         </table>
       </div>
+
+      <figure class="wide-shot reveal-child">
+        <a href="img/homepage.jpg" title="Open full size">
+        <img src="img/homepage.jpg" width="1400" height="676" loading="lazy"
+             alt="Homepage dashboard with tiles for every service across sentinel, forge and synapse, each with a live status pill, plus Grafana and Prometheus summary widgets."></a>
+        <figcaption>
+          <span class="shot-step">Homepage · sentinel</span>
+          One screen for all three nodes, reading each one's containers through a read-only
+          socket proxy. Shown as it was, warts included: the vLLM tile's pill can't find its
+          container by name, and Prometheus has two targets down.
+        </figcaption>
+      </figure>
+
+      <figure class="wide-shot reveal-child">
+        <a href="img/uptime-kuma.jpg" title="Open full size">
+        <img src="img/uptime-kuma.jpg" width="1400" height="690" loading="lazy"
+             alt="Uptime Kuma dashboard: 22 monitors up, 0 down, with a list of monitors and an event log of recent up and down events."></a>
+        <figcaption>
+          <span class="shot-step">Uptime Kuma · sentinel</span>
+          22 monitors, all up, watching forge and synapse from the Pi. The event log shows forge's
+          services dropping and coming back on the evening of 20 October. One error message is
+          blurred because it contained a tailnet address.
+        </figcaption>
+      </figure>
     </div>
   </section>
 

@@ -61,6 +61,16 @@ consumer is built so that synapse being down costs a feature, never an alert.
 
 Each node runs its own Portainer; services address each other by Tailscale name.
 
+![Homepage on sentinel: every service across all three nodes](img/homepage.jpg)
+
+*Homepage on sentinel: one screen for all three nodes, as it was, warts included
+(the vLLM pill can't find its container by name; two Prometheus targets down).*
+
+![Uptime Kuma on sentinel: 22 monitors up](img/uptime-kuma.jpg)
+
+*Uptime Kuma on sentinel: 22 monitors, all up. One error message is blurred
+because it contained a tailnet address.*
+
 ---
 
 ## Project — Blink smart alerts
