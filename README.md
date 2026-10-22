@@ -198,6 +198,11 @@ clean.
 
 ## Local AI — synapse
 
+<img src="img/synapse.jpg" alt="synapse with the side panel off: Noctua air cooler on a TRX50 board, two RTX 5070 Tis stacked below" width="320">
+
+*synapse, side panel off: Threadripper 9960X under a Noctua air cooler, two RTX
+5070 Tis stacked below it.*
+
 A fully local agent on a fully local model, reachable over Discord, with web
 search and no paid APIs in the steady state.
 

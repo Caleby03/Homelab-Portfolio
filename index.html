@@ -344,6 +344,34 @@
     font-family: var(--mono); font-size: 0.78em; letter-spacing: 0.04em; color: var(--emerald-label);
   }
 
+  /* ---------- synapse photo beside its spec list ---------- */
+
+  .rig {
+    display: grid;
+    grid-template-columns: minmax(0, 260px) 1fr;
+    gap: 22px;
+    align-items: start;
+    margin-bottom: 18px;
+  }
+  .rig > ul { margin: 0; }
+  .rig-photo {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--magenta-border);
+    background: var(--panel-bg-nested);
+  }
+  .rig-photo a { display: block; cursor: zoom-in; }
+  .rig-photo img { display: block; width: 100%; height: auto; background: #1a1d24; }
+  .rig-photo figcaption { padding: 9px 12px 11px; font-size: 0.84em; line-height: 1.45; color: var(--text-dim); }
+  .rig-photo .shot-step {
+    display: block; margin-bottom: 3px;
+    font-family: var(--mono); font-size: 0.82em; letter-spacing: 0.04em; color: var(--magenta-label);
+  }
+  @media (max-width: 700px) {
+    .rig { grid-template-columns: 1fr; }
+    .rig-photo { max-width: 360px; }
+  }
+
   /* ---------- Terminal capture ----------
      Real command output pasted as text, not a screenshot, so it stays sharp
      and searchable. Scrolls sideways inside itself on narrow screens. */
@@ -1414,21 +1442,31 @@
         A fully local agent on a fully local model, reachable over Discord, with web search
         and no paid APIs in the steady state.
       </p>
-      <ul>
-        <li class="reveal-child"><strong>Inference:</strong> vLLM serving Qwen3.6-35B-A3B at NVFP4, tensor-parallel across
-          both 16GB cards, 262K context, vision enabled. Chosen over a dense 27B after a
-          benchmark tied them on reasoning and tool use at 238 vs ~102 tok/s and 262K vs
-          ~88K context.</li>
-        <li class="reveal-child"><strong>Tuned from failures, not defaults.</strong> The speculative-decoding draft head
-          requested unprofiled memory and OOM-crashed vLLM twice, so it is off. Automatic
-          KV-cache sizing left ~76MB free per card, so the cache is a fixed size with real
-          headroom. Prefix caching caused long-prompt hangs on this hybrid architecture, so
-          it is off.</li>
-        <li class="reveal-child"><strong>Agent:</strong> Hermes Agent in a container — non-root, no Docker socket,
-          <code>no-new-privileges</code>, 4GB and 512-PID limits. Only allowlisted Discord users
-          can command it, and memory or skill writes need explicit approval before they
-          persist.</li>
-      </ul>
+      <div class="rig">
+        <figure class="rig-photo reveal-child">
+          <a href="img/synapse.jpg" title="Open full size"><img src="img/synapse.jpg" width="800" height="1067" loading="lazy"
+               alt="synapse with the side panel off: a Corsair case with a dual-fan Noctua air cooler on a Gigabyte TRX50 AERO D board, and two Gigabyte GeForce RTX 5070 Ti cards stacked below it."></a>
+          <figcaption>
+            <span class="shot-step">synapse, side panel off</span>
+            Threadripper 9960X under a Noctua air cooler, two RTX 5070 Tis stacked below it.
+          </figcaption>
+        </figure>
+        <ul>
+          <li class="reveal-child"><strong>Inference:</strong> vLLM serving Qwen3.6-35B-A3B at NVFP4, tensor-parallel across
+            both 16GB cards, 262K context, vision enabled. Chosen over a dense 27B after a
+            benchmark tied them on reasoning and tool use at 238 vs ~102 tok/s and 262K vs
+            ~88K context.</li>
+          <li class="reveal-child"><strong>Tuned from failures, not defaults.</strong> The speculative-decoding draft head
+            requested unprofiled memory and OOM-crashed vLLM twice, so it is off. Automatic
+            KV-cache sizing left ~76MB free per card, so the cache is a fixed size with real
+            headroom. Prefix caching caused long-prompt hangs on this hybrid architecture, so
+            it is off.</li>
+          <li class="reveal-child"><strong>Agent:</strong> Hermes Agent in a container — non-root, no Docker socket,
+            <code>no-new-privileges</code>, 4GB and 512-PID limits. Only allowlisted Discord users
+            can command it, and memory or skill writes need explicit approval before they
+            persist.</li>
+        </ul>
+      </div>
 
       <figure class="term reveal-child">
         <div class="term-bar"><i></i><i></i><i></i><span>synapse</span></div>
